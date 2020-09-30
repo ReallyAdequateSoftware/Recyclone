@@ -8,81 +8,233 @@
 import SpriteKit
 import GameplayKit
 
+func +(left: CGPoint, right: CGPoint) -> CGPoint {
+    return CGPoint(x: left.x + right.x, y: left.y + right.y)
+}
+
+func -(left: CGPoint, right: CGPoint) -> CGPoint {
+    return CGPoint(x: left.x - right.x, y: left.y - right.y)
+}
+
+func *(point: CGPoint, scalar: CGFloat) -> CGPoint {
+    return CGPoint(x: point.x * scalar, y: point.y * scalar)
+}
+
+func /(point: CGPoint, scalar: CGFloat) -> CGPoint {
+    return CGPoint(x: point.x / scalar, y: point.y / scalar)
+}
+
+#if !(arch(x86_64) || arch(arm64))
+func sqrt(a: CGFloat) -> CGFloat {
+    return CGFloat(sqrtf(Float(a)))
+}
+#endif
+
+
+struct Item: Hashable{
+    let texture: SKTexture
+    let type: String
+}
+
+struct PhysicsCategory {
+    static let none      : UInt32 = 0
+    static let all       : UInt32 = UInt32.max
+    static let boundary  : UInt32 = 0b1
+    static let item      : UInt32 = 0b10
+    
+}
+extension CGPoint {
+    func length() -> CGFloat {
+        return sqrt(x*x + y*y)
+    }
+    
+    func normalized() -> CGPoint {
+        return self / length()
+    }
+}
+
+
 class GameScene: SKScene {
     
-    private var label : SKLabelNode?
-    private var spinnyNode : SKShapeNode?
+    var items = Set<Item>()
+    var FALL_TIME = 20
+    var SCORE = 0
+    var scoreNode = SKLabelNode()
+    let NUM_OF_RECYCLE_IMG = 0
+    let NUM_OF_COMPOST_IMG = 1
+    let SCREEN_WIDTH = UIScreen.main.bounds.size.width
+    let SCREEN_HEIGHT = UIScreen.main.bounds.size.height
+    var compostBin = SKSpriteNode()
+    var currentZ = 0
+    let BOUNDARY_OUTSET = CGFloat(100)
     
+    //node for tracking touch input
+    private var currentNode: SKNode?
+    
+    /*
+     when view is loaded
+     */
     override func didMove(to view: SKView) {
+        backgroundColor = SKColor.white
+        //initialize trash item textures
+        for i in 0..<NUM_OF_COMPOST_IMG{
+            items.insert( Item(texture: SKTexture(imageNamed: "compost/compost\(i)"),
+                               type: "compost"))
+        }
+        for i in 0..<NUM_OF_RECYCLE_IMG{
+            items.insert( Item(texture: SKTexture(imageNamed: "recycle/recycle\(i)"),
+                               type: "recycle"))
+        }
+        print(items)
+        print("width: \(SCREEN_WIDTH)")
+        print("height: \(SCREEN_HEIGHT)")
         
-        // Get label node from scene and store it for use later
-        self.label = self.childNode(withName: "//helloLabel") as? SKLabelNode
-        if let label = self.label {
-            label.alpha = 0.0
-            label.run(SKAction.fadeIn(withDuration: 2.0))
-        }
+        //setup boundary removal physics for performance
+        physicsWorld.gravity = .zero
+        physicsWorld.contactDelegate = self
+        physicsBody = SKPhysicsBody(edgeFrom: CGPoint(
+                                        x: -BOUNDARY_OUTSET,
+                                        y: -BOUNDARY_OUTSET),
+                                    to: CGPoint(
+                                        x: SCREEN_WIDTH + BOUNDARY_OUTSET,
+                                        y: -BOUNDARY_OUTSET))
+        physicsBody?.categoryBitMask = PhysicsCategory.boundary
         
-        // Create shape node to use during mouse interaction
-        let w = (self.size.width + self.size.height) * 0.05
-        self.spinnyNode = SKShapeNode.init(rectOf: CGSize.init(width: w, height: w), cornerRadius: w * 0.3)
+        //setup scoring
+        scoreNode.text = "\(SCORE)"
+        scoreNode.position = CGPoint(x: SCREEN_WIDTH/2, y: SCREEN_HEIGHT - BOUNDARY_OUTSET)
+        scoreNode.fontColor = UIColor.black
+        scoreNode.fontSize = CGFloat(40)
+        addChild(scoreNode)
         
-        if let spinnyNode = self.spinnyNode {
-            spinnyNode.lineWidth = 2.5
-            
-            spinnyNode.run(SKAction.repeatForever(SKAction.rotate(byAngle: CGFloat(Double.pi), duration: 1)))
-            spinnyNode.run(SKAction.sequence([SKAction.wait(forDuration: 0.5),
-                                              SKAction.fadeOut(withDuration: 0.5),
-                                              SKAction.removeFromParent()]))
-        }
+        //add scoring bins
+        addBins()
+        //add the items
+        run(SKAction.repeat(SKAction.sequence([
+            SKAction.run(addItem),
+            SKAction.wait(forDuration: 1)
+        ]),
+        count: 10))
     }
     
-    
-    func touchDown(atPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.green
-            self.addChild(n)
-        }
-    }
-    
-    func touchMoved(toPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.blue
-            self.addChild(n)
-        }
-    }
-    
-    func touchUp(atPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.red
-            self.addChild(n)
-        }
-    }
-    
+    /*
+     HANDLE TOUCH EVENTS
+     */
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let label = self.label {
-            label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
+        //get first touch out of all of them
+        if let touch = touches.first{
+            //get coords of the touch
+            let location = touch.location(in: self)
+            //get an array of the nodes at the touch location
+            let touchedNodes = self.nodes(at: location)
+            //reversed to select nodes that appear on top, first
+            for node in touchedNodes.reversed(){
+                if node.name == "compost" || node.name == "recycle"{
+                    self.currentNode = node
+                    currentNode?.isPaused = true
+                }
+            }
         }
-        
-        for t in touches { self.touchDown(atPoint: t.location(in: self)) }
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchMoved(toPoint: t.location(in: self)) }
+        if let touch = touches.first, let node = self.currentNode {
+            let touchLocation = touch.location(in: self)
+            node.position = touchLocation
+        }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchUp(atPoint: t.location(in: self)) }
+        if(self.currentNode?.name == "compost"){
+            if(compostBin.frame.contains(self.currentNode!.position)){
+                SCORE += 1
+                currentZ -= 1
+                scoreNode.text = "\(SCORE)"
+                print(SCORE)
+                self.currentNode?.removeFromParent()
+            }
+        }
+        self.currentNode?.isPaused = false
+        self.currentNode = nil
     }
     
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchUp(atPoint: t.location(in: self)) }
+        self.currentNode?.isPaused = false
+        self.currentNode = nil
     }
     
     
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
+    }
+    
+    
+    /*
+     random number generation
+     */
+    func random() -> CGFloat{
+        return CGFloat(Float(arc4random()) / 0xFFFFFFFF)
+    }
+    
+    func random(min: CGFloat, max:CGFloat) -> CGFloat{
+        return random() * (max-min) + min
+    }
+    
+    /*
+     add an item of trash onto the screen
+     */
+    func addItem(){
+        //create a new item with a random texture
+        let randomItem = items.randomElement()
+        let item = SKSpriteNode(texture: randomItem?.texture)
+        item.name = randomItem?.type
+        item.position = CGPoint(x: random(min: 0,
+                                          max: SCREEN_WIDTH - item.size.width),
+                                y: random(min: SCREEN_HEIGHT,
+                                          max: SCREEN_HEIGHT + item.position.y * 2))
+        item.zPosition = CGFloat(currentZ)
+        //set physics
+        item.physicsBody = SKPhysicsBody(circleOfRadius: item.size.width/2)
+        item.physicsBody?.affectedByGravity = false
+        item.physicsBody?.categoryBitMask = PhysicsCategory.item
+        item.physicsBody?.contactTestBitMask = PhysicsCategory.boundary
+        item.physicsBody?.collisionBitMask = PhysicsCategory.none
+        item.physicsBody?.isDynamic = true
+        
+        currentZ += 1
+        addChild(item)
+        
+        let moveAction = SKAction.move(by: CGVector(dx: 0,
+                                                    dy: -(SCREEN_HEIGHT + item.position.y)),
+                                       duration: TimeInterval(FALL_TIME))
+        item.run(moveAction)
+        print("\(item.name ?? "nothing") added")
+    }
+    
+    /*
+     add scoring bins
+     */
+    func addBins(){
+        compostBin = SKSpriteNode(imageNamed: "compost_bin")
+        compostBin.position = CGPoint(x: compostBin.size.width / 2,
+                                      y: compostBin.size.height)
+        compostBin.zPosition = CGFloat(-1)
+        addChild(compostBin)
+    }
+    
+}
+
+extension GameScene: SKPhysicsContactDelegate{
+    func didBegin(_ contact: SKPhysicsContact){
+        //remove the item if it contacted the boundary
+        if contact.bodyA.categoryBitMask == PhysicsCategory.item {
+            contact.bodyA.node?.removeFromParent()
+            print("item removed")
+        }
+        
+        if contact.bodyB.categoryBitMask == PhysicsCategory.item {
+            contact.bodyB.node?.removeFromParent()
+            print("item removed")
+        }
     }
 }

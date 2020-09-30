@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		1666849B25227DAF00BBC221 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1666849A25227DAF00BBC221 /* AppDelegate.swift */; };
-		1666849D25227DAF00BBC221 /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 1666849C25227DAF00BBC221 /* GameScene.sks */; };
 		1666849F25227DAF00BBC221 /* Actions.sks in Resources */ = {isa = PBXBuildFile; fileRef = 1666849E25227DAF00BBC221 /* Actions.sks */; };
 		166684A125227DAF00BBC221 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 166684A025227DAF00BBC221 /* GameScene.swift */; };
 		166684A325227DAF00BBC221 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 166684A225227DAF00BBC221 /* GameViewController.swift */; };
@@ -16,6 +15,7 @@
 		166684A825227DB100BBC221 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 166684A725227DB100BBC221 /* Assets.xcassets */; };
 		166684B325227DB100BBC221 /* RecycloneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 166684B225227DB100BBC221 /* RecycloneTests.swift */; };
 		166684BE25227DB100BBC221 /* RecycloneUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 166684BD25227DB100BBC221 /* RecycloneUITests.swift */; };
+		16E963072523D35900D05497 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 16E963032523D22000D05497 /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,7 +38,6 @@
 /* Begin PBXFileReference section */
 		1666849725227DAF00BBC221 /* Recyclone.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Recyclone.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1666849A25227DAF00BBC221 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		1666849C25227DAF00BBC221 /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
 		1666849E25227DAF00BBC221 /* Actions.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Actions.sks; sourceTree = "<group>"; };
 		166684A025227DAF00BBC221 /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
 		166684A225227DAF00BBC221 /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
@@ -51,6 +50,7 @@
 		166684B925227DB100BBC221 /* RecycloneUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RecycloneUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		166684BD25227DB100BBC221 /* RecycloneUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecycloneUITests.swift; sourceTree = "<group>"; };
 		166684BF25227DB100BBC221 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		16E963032523D22000D05497 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,8 +101,8 @@
 		1666849925227DAF00BBC221 /* Recyclone */ = {
 			isa = PBXGroup;
 			children = (
+				16E963032523D22000D05497 /* LaunchScreen.storyboard */,
 				1666849A25227DAF00BBC221 /* AppDelegate.swift */,
-				1666849C25227DAF00BBC221 /* GameScene.sks */,
 				1666849E25227DAF00BBC221 /* Actions.sks */,
 				166684A025227DAF00BBC221 /* GameScene.swift */,
 				166684A225227DAF00BBC221 /* GameViewController.swift */,
@@ -235,7 +235,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				166684A625227DAF00BBC221 /* Main.storyboard in Resources */,
-				1666849D25227DAF00BBC221 /* GameScene.sks in Resources */,
+				16E963072523D35900D05497 /* LaunchScreen.storyboard in Resources */,
 				166684A825227DB100BBC221 /* Assets.xcassets in Resources */,
 				1666849F25227DAF00BBC221 /* Actions.sks in Resources */,
 			);
