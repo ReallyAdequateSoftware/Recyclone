@@ -57,9 +57,13 @@ extension CGPoint {
 class GameScene: SKScene {
     
     var items = Set<Item>()
-    var FALL_TIME = 20
-    var SCORE = 0
+    var fallTime = 20
+    var fallInterval = 1
+    var difficulty = 1
+    var itemsMissed = 0
+    var score = 0
     var scoreNode = SKLabelNode()
+    var itemsMissedNode = SKLabelNode()
     let NUM_OF_RECYCLE_IMG = 0
     let NUM_OF_COMPOST_IMG = 1
     let SCREEN_WIDTH = UIScreen.main.bounds.size.width
@@ -67,6 +71,8 @@ class GameScene: SKScene {
     var compostBin = SKSpriteNode()
     var currentZ = 0
     let BOUNDARY_OUTSET = CGFloat(100)
+    let FONT_SIZE = 30
+    let FONT_NAME = "HelveticaNeue"
     
     //map for associating individual touches with items
     private var touchToNode = [UITouch: SKNode]()
@@ -89,7 +95,7 @@ class GameScene: SKScene {
         print("width: \(SCREEN_WIDTH)")
         print("height: \(SCREEN_HEIGHT)")
         
-        //setup boundary removal physics for performance
+        //setup boundary removal physics for performance and game over mechanism
         physicsWorld.gravity = .zero
         physicsWorld.contactDelegate = self
         physicsBody = SKPhysicsBody(edgeFrom: CGPoint(
@@ -101,20 +107,47 @@ class GameScene: SKScene {
         physicsBody?.categoryBitMask = PhysicsCategory.boundary
         
         //setup scoring
-        scoreNode.text = "\(SCORE)"
-        scoreNode.position = CGPoint(x: SCREEN_WIDTH/2, y: SCREEN_HEIGHT - BOUNDARY_OUTSET)
-        scoreNode.fontColor = UIColor.black
-        scoreNode.fontSize = CGFloat(40)
+        scoreNode.text = "\(score)"
+        scoreNode.position = CGPoint(x: SCREEN_WIDTH * 0.25,
+                                     y: SCREEN_HEIGHT - BOUNDARY_OUTSET)
+        scoreNode.fontColor = UIColor.green
+        scoreNode.fontSize = CGFloat(FONT_SIZE)
+        scoreNode.fontName = FONT_NAME
         addChild(scoreNode)
+        
+        itemsMissedNode.text = "\(itemsMissed)"
+        itemsMissedNode.position = CGPoint(x: SCREEN_WIDTH * 0.75,
+                                           y: SCREEN_HEIGHT - BOUNDARY_OUTSET)
+        itemsMissedNode.fontColor = UIColor.red
+        itemsMissedNode.fontSize = CGFloat(FONT_SIZE)
+        itemsMissedNode.fontName = FONT_NAME
+        addChild(itemsMissedNode)
         
         //add scoring bins
         addBins()
         //add the items
-        run(SKAction.repeat(SKAction.sequence([
-            SKAction.run(addItem),
-            SKAction.wait(forDuration: 1)
-        ]),
-        count: 10))
+        run(
+            SKAction.repeatForever (
+                SKAction.sequence([
+                    SKAction.wait(forDuration: TimeInterval(1/difficulty)),
+                    SKAction.run({
+                        self.addItem()
+                        if self.itemsMissed > 10 {
+                            view.isPaused = true
+                            self.removeAction(forKey: "New Thread")
+                            //go to game over screen
+                        }
+                    })
+                ])
+            ),
+            withKey: "New Thread"
+        )
+        
+        //        run(SKAction.repeat(SKAction.sequence([
+        //            SKAction.run(addItem),
+        //            SKAction.wait(forDuration: 1)
+        //        ]),
+        //        count: 10))
     }
     
     /*
@@ -174,7 +207,7 @@ class GameScene: SKScene {
     /*
      random number generation
      */
-    func random() -> CGFloat{
+    func random() -> CGFloat{	
         return CGFloat(Float(arc4random()) / 0xFFFFFFFF)
     }
     
@@ -208,7 +241,7 @@ class GameScene: SKScene {
         
         let moveAction = SKAction.move(by: CGVector(dx: 0,
                                                     dy: -(SCREEN_HEIGHT + item.position.y)),
-                                       duration: TimeInterval(FALL_TIME))
+                                       duration: TimeInterval(fallTime))
         item.run(moveAction)
         print("\(item.name ?? "nothing") added")
     }
@@ -226,16 +259,23 @@ class GameScene: SKScene {
     
 }
 
+/*
+ handle missed items
+ */
 extension GameScene: SKPhysicsContactDelegate{
     func didBegin(_ contact: SKPhysicsContact){
         //remove the item if it contacted the boundary
         if contact.bodyA.categoryBitMask == PhysicsCategory.item {
             contact.bodyA.node?.removeFromParent()
+            itemsMissed += 1
+            itemsMissedNode.text = "\(itemsMissed)"
             print("item removed")
         }
         
         if contact.bodyB.categoryBitMask == PhysicsCategory.item {
             contact.bodyB.node?.removeFromParent()
+            itemsMissed += 1
+            itemsMissedNode.text = "\(itemsMissed)"
             print("item removed")
         }
     }
