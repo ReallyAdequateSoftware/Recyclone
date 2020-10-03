@@ -179,9 +179,9 @@ class GameScene: SKScene {
             if let node = self.touchToNode[touch],
                (node.name == "compost"){
                 if(compostBin.frame.contains(node.position)){
-                    SCORE += 1
+                    score += 1
                     currentZ -= 1
-                    scoreNode.text = "\(SCORE)"
+                    scoreNode.text = "\(score)"
                     node.removeFromParent()
                     
                 }
