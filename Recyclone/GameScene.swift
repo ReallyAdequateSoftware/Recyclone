@@ -182,6 +182,10 @@ class GameScene: SKScene {
                     score += 1
                     currentZ -= 1
                     scoreNode.text = "\(score)"
+                    if (score == fallTime){
+                        difficulty += 1
+                        fallTime /= difficulty
+                    }
                     node.removeFromParent()
                     
                 }
