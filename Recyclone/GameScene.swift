@@ -68,8 +68,8 @@ class GameScene: SKScene {
     var currentZ = 0
     let BOUNDARY_OUTSET = CGFloat(100)
     
-    //node for tracking touch input
-    private var currentNode: SKNode?
+    //map for associating individual touches with items
+    private var touchToNode = [UITouch: SKNode]()
     
     /*
      when view is loaded
@@ -121,46 +121,48 @@ class GameScene: SKScene {
      HANDLE TOUCH EVENTS
      */
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        //get first touch out of all of them
-        if let touch = touches.first{
-            //get coords of the touch
+        for touch in touches{
             let location = touch.location(in: self)
-            //get an array of the nodes at the touch location
             let touchedNodes = self.nodes(at: location)
             //reversed to select nodes that appear on top, first
             for node in touchedNodes.reversed(){
                 if node.name == "compost" || node.name == "recycle"{
-                    self.currentNode = node
-                    currentNode?.isPaused = true
+                    node.isPaused = true
+                    self.touchToNode.updateValue(node, forKey: touch)
+                    break
                 }
             }
         }
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let touch = touches.first, let node = self.currentNode {
-            let touchLocation = touch.location(in: self)
-            node.position = touchLocation
+        for touch in touches{
+            touchToNode[touch]?.position = touch.location(in: self)
         }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if(self.currentNode?.name == "compost"){
-            if(compostBin.frame.contains(self.currentNode!.position)){
-                SCORE += 1
-                currentZ -= 1
-                scoreNode.text = "\(SCORE)"
-                print(SCORE)
-                self.currentNode?.removeFromParent()
+        for touch in touches{
+            if let node = self.touchToNode[touch],
+               (node.name == "compost"){
+                if(compostBin.frame.contains(node.position)){
+                    SCORE += 1
+                    currentZ -= 1
+                    scoreNode.text = "\(SCORE)"
+                    node.removeFromParent()
+                    
+                }
             }
+            self.touchToNode[touch]?.isPaused = false
+            touchToNode.removeValue(forKey: touch)
         }
-        self.currentNode?.isPaused = false
-        self.currentNode = nil
     }
     
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        self.currentNode?.isPaused = false
-        self.currentNode = nil
+        for touch in touches{
+            self.touchToNode[touch]?.isPaused = false
+            touchToNode.removeValue(forKey: touch)
+        }
     }
     
     
