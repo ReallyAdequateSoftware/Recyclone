@@ -58,6 +58,7 @@ class GameScene: SKScene {
     
     var items = Set<Item>()
     var fallTime = 10
+    var itemSpeed = 80
     var fallInterval = 1
     var difficulty = 1
     var itemsMissed = 0
@@ -94,7 +95,7 @@ class GameScene: SKScene {
         print(items)
         print("width: \(SCREEN_WIDTH)")
         print("height: \(SCREEN_HEIGHT)")
-        
+                
         //setup boundary removal physics for performance and game over mechanism
         physicsWorld.gravity = .zero
         physicsWorld.contactDelegate = self
@@ -129,9 +130,10 @@ class GameScene: SKScene {
         run(
             SKAction.repeatForever (
                 SKAction.sequence([
-                    SKAction.wait(forDuration: TimeInterval(1/difficulty)),
+                    SKAction.wait(forDuration: TimeInterval(0)),
                     SKAction.run({
                         self.addItem()
+                        print(self.difficulty)
                         if self.itemsMissed > 100 {
                             view.isPaused = true
                             self.removeAction(forKey: "New Thread")
@@ -143,11 +145,6 @@ class GameScene: SKScene {
             withKey: "New Thread"
         )
         
-        //        run(SKAction.repeat(SKAction.sequence([
-        //            SKAction.run(addItem),
-        //            SKAction.wait(forDuration: 1)
-        //        ]),
-        //        count: 10))
     }
     
     /*
@@ -184,15 +181,16 @@ class GameScene: SKScene {
                     score += 1
                     currentZ -= 1
                     scoreNode.text = "\(score)"
-                    if (score == fallTime){
-                        difficulty += 1
-                        fallTime /= difficulty
+                    if (score == itemSpeed / 4){
+                        difficulty += 5
+                        itemSpeed += 10
                     }
                     node.removeFromParent()
                 }else{//reset the movement of the node if it wasn't removed
                     let moveAction = SKAction.move(by: CGVector(dx: 0,
                                                                 dy: -(SCREEN_HEIGHT + node.position.y)),
-                                                   duration: TimeInterval(fallTime))
+                                                   duration: TimeInterval(node.position.y / CGFloat(itemSpeed)
+                                                   ))
                     
                     print("moved")
                     node.run(moveAction)
@@ -237,8 +235,7 @@ class GameScene: SKScene {
         item.name = randomItem?.type
         item.position = CGPoint(x: random(min: 0,
                                           max: SCREEN_WIDTH - item.size.width),
-                                y: random(min: SCREEN_HEIGHT,
-                                          max: SCREEN_HEIGHT + item.position.y * 2))
+                                y: SCREEN_HEIGHT + item.size.height)
         item.zPosition = CGFloat(currentZ)
         //set physics
         item.physicsBody = SKPhysicsBody(circleOfRadius: item.size.width/2)
@@ -253,7 +250,7 @@ class GameScene: SKScene {
         
         let moveAction = SKAction.move(by: CGVector(dx: 0,
                                                     dy: -(SCREEN_HEIGHT + item.position.y)),
-                                       duration: TimeInterval(fallTime))
+                                       duration: TimeInterval(item.position.y / CGFloat(itemSpeed)))
         item.run(moveAction, withKey: "move")
         print("\(item.name ?? "nothing") added")
     }
