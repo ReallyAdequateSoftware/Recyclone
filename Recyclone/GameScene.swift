@@ -57,7 +57,7 @@ extension CGPoint {
 class GameScene: SKScene {
     
     var items = Set<Item>()
-    var fallTime = 20
+    var fallTime = 10
     var fallInterval = 1
     var difficulty = 1
     var itemsMissed = 0
@@ -132,7 +132,7 @@ class GameScene: SKScene {
                     SKAction.wait(forDuration: TimeInterval(1/difficulty)),
                     SKAction.run({
                         self.addItem()
-                        if self.itemsMissed > 10 {
+                        if self.itemsMissed > 100 {
                             view.isPaused = true
                             self.removeAction(forKey: "New Thread")
                             //go to game over screen
@@ -177,7 +177,9 @@ class GameScene: SKScene {
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches{
             if let node = self.touchToNode[touch],
-               (node.name == "compost"){
+               (node.name == "compost") ||
+               (node.name == "recycle"){
+                //check if the item was placed in the right bin
                 if(compostBin.frame.contains(node.position)){
                     score += 1
                     currentZ -= 1
@@ -187,7 +189,13 @@ class GameScene: SKScene {
                         fallTime /= difficulty
                     }
                     node.removeFromParent()
+                }else{//reset the movement of the node if it wasn't removed
+                    let moveAction = SKAction.move(by: CGVector(dx: 0,
+                                                                dy: -(SCREEN_HEIGHT + node.position.y)),
+                                                   duration: TimeInterval(fallTime))
                     
+                    print("moved")
+                    node.run(moveAction)
                 }
             }
             self.touchToNode[touch]?.isPaused = false
@@ -246,7 +254,7 @@ class GameScene: SKScene {
         let moveAction = SKAction.move(by: CGVector(dx: 0,
                                                     dy: -(SCREEN_HEIGHT + item.position.y)),
                                        duration: TimeInterval(fallTime))
-        item.run(moveAction)
+        item.run(moveAction, withKey: "move")
         print("\(item.name ?? "nothing") added")
     }
     
