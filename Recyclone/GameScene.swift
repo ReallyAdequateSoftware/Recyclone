@@ -30,10 +30,15 @@ func sqrt(a: CGFloat) -> CGFloat {
 }
 #endif
 
+enum ItemType: String {
+    case recycle
+    case trash
+    case compost
+}
 
-struct Item: Hashable{
+struct ItemTexture: Hashable{
     let texture: SKTexture
-    let type: String
+    let type: ItemType
 }
 
 
@@ -58,7 +63,7 @@ extension CGPoint {
 
 class GameScene: SKScene {
     
-    var items = Set<Item>()
+    var itemTextures = Set<ItemTexture>()
     var itemSpeed = Float(200)
     let ITEM_SPEED_MULTI = Float(1.15);
     var itemDropCountdown = TimeInterval(1)
@@ -97,17 +102,17 @@ class GameScene: SKScene {
         backgroundColor = SKColor.white
         //initialize trash item textures
         for i in 0..<NUM_OF_COMPOST_IMG{
-            items.insert( Item(texture: SKTexture(imageNamed: "compost/compost\(i)"),
-                               type: "compost"))
+            itemTextures.insert( ItemTexture(texture: SKTexture(imageNamed: "compost/compost\(i)"),
+                               type: ItemType.compost))
         }
         for i in 0..<NUM_OF_RECYCLE_IMG{
-            items.insert( Item(texture: SKTexture(imageNamed: "recycle/recycle\(i)"),
-                               type: "recycle"))
+            itemTextures.insert( ItemTexture(texture: SKTexture(imageNamed: "recycle/recycle\(i)"),
+                               type: ItemType.recycle))
         }
-        print(items)
+        print(itemTextures)
         print("width: \(SCREEN_WIDTH)")
         print("height: \(SCREEN_HEIGHT)")
-                
+        
         //setup boundary removal physics for performance and game over mechanism
         physicsWorld.gravity = CGVector(dx: 0, dy: 0)
         physicsWorld.contactDelegate = self
@@ -170,7 +175,7 @@ class GameScene: SKScene {
         for touch in touches{
             if let node = self.touchToNode[touch], //only get nodes that are a trash item
                (node.name == "compost") ||
-               (node.name == "recycle"){
+                (node.name == "recycle"){
                 if(compostBin.frame.contains(node.position)){   //check if the item was placed in the right bin
                     score += 1
                     currentZ -= 1
@@ -179,13 +184,9 @@ class GameScene: SKScene {
                         itemSpeed *= ITEM_SPEED_MULTI
                     }
                     node.removeFromParent()
-                }else{  //reset the movement of the node if it wasn't removed
-                    let moveAction = SKAction.move(by: CGVector(dx: 0,
-                                                                dy: -(SCREEN_HEIGHT + node.position.y)),
-                                                   duration: TimeInterval(node.position.y / CGFloat(itemSpeed)
-                                                   ))
-                    
-                    node.run(moveAction)
+                } else {    //reset the movement of hte node if it wasn't removed
+                    node.physicsBody?.velocity = CGVector(dx: 0,
+                                                          dy: CGFloat(-itemSpeed))
                 }
             }
             self.touchToNode[touch]?.isPaused = false
@@ -241,9 +242,9 @@ class GameScene: SKScene {
      */
     func addItem(){
         //create a new item with a random texture
-        let randomItem = items.randomElement()
-        let item = SKSpriteNode(texture: randomItem?.texture)
-        item.name = randomItem?.type
+        let randomItemTexture = itemTextures.randomElement()
+        let item = SKSpriteNode(texture: randomItemTexture?.texture)
+        item.name = randomItemTexture?.type.rawValue
         item.position = CGPoint(x: random(min: 0,
                                           max: SCREEN_WIDTH - item.size.width),
                                 y: SCREEN_HEIGHT + item.size.height)
@@ -258,7 +259,7 @@ class GameScene: SKScene {
         item.physicsBody?.velocity = CGVector(dx: 0,
                                               dy: CGFloat(-itemSpeed))
         item.physicsBody?.linearDamping = 0
-
+        
         
         currentZ += 1
         addChild(item)
