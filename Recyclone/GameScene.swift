@@ -30,11 +30,17 @@ func sqrt(a: CGFloat) -> CGFloat {
 }
 #endif
 
-
-struct Item: Hashable{
-    let texture: SKTexture
-    let type: String
+enum ItemType: String {
+    case recycle
+    case trash
+    case compost
 }
+
+struct ItemTexture: Hashable{
+    let texture: SKTexture
+    let type: ItemType
+}
+
 
 struct PhysicsCategory {
     static let none      : UInt32 = 0
@@ -43,6 +49,7 @@ struct PhysicsCategory {
     static let item      : UInt32 = 0b10
     
 }
+
 extension CGPoint {
     func length() -> CGFloat {
         return sqrt(x*x + y*y)
@@ -56,12 +63,23 @@ extension CGPoint {
 
 class GameScene: SKScene {
     
-    var items = Set<Item>()
-    var fallTime = 10
-    var fallInterval = 1
-    var difficulty = 1
-    var itemsMissed = 0
-    var score = 0
+    var itemTextures = Set<ItemTexture>()
+    var itemSpeed = Float(200)
+    let ITEM_SPEED_MULTI = Float(1.15);
+    var itemDropCountdown = TimeInterval(1)
+    var itemDropInterval = TimeInterval(1)
+    let ITEM_INTERVAL_MULTI = Double(0.7)
+    var lastTimeInterval = TimeInterval(0)
+    var itemsMissed = 0 {
+        didSet{
+            itemsMissedNode.text = "\(itemsMissed)"
+        }
+    }
+    var score = 0 {
+        didSet {
+            scoreNode.text = "\(score)"
+        }
+    }
     var scoreNode = SKLabelNode()
     var itemsMissedNode = SKLabelNode()
     let NUM_OF_RECYCLE_IMG = 0
@@ -84,19 +102,19 @@ class GameScene: SKScene {
         backgroundColor = SKColor.white
         //initialize trash item textures
         for i in 0..<NUM_OF_COMPOST_IMG{
-            items.insert( Item(texture: SKTexture(imageNamed: "compost/compost\(i)"),
-                               type: "compost"))
+            itemTextures.insert( ItemTexture(texture: SKTexture(imageNamed: "compost/compost\(i)"),
+                               type: ItemType.compost))
         }
         for i in 0..<NUM_OF_RECYCLE_IMG{
-            items.insert( Item(texture: SKTexture(imageNamed: "recycle/recycle\(i)"),
-                               type: "recycle"))
+            itemTextures.insert( ItemTexture(texture: SKTexture(imageNamed: "recycle/recycle\(i)"),
+                               type: ItemType.recycle))
         }
-        print(items)
+        print(itemTextures)
         print("width: \(SCREEN_WIDTH)")
         print("height: \(SCREEN_HEIGHT)")
         
         //setup boundary removal physics for performance and game over mechanism
-        physicsWorld.gravity = .zero
+        physicsWorld.gravity = CGVector(dx: 0, dy: 0)
         physicsWorld.contactDelegate = self
         physicsBody = SKPhysicsBody(edgeFrom: CGPoint(
                                         x: -BOUNDARY_OUTSET,
@@ -107,9 +125,9 @@ class GameScene: SKScene {
         physicsBody?.categoryBitMask = PhysicsCategory.boundary
         
         //setup scoring
-        scoreNode.text = "\(score)"
         scoreNode.position = CGPoint(x: SCREEN_WIDTH * 0.25,
                                      y: SCREEN_HEIGHT - BOUNDARY_OUTSET)
+        scoreNode.text = "\(score)"
         scoreNode.fontColor = UIColor.green
         scoreNode.fontSize = CGFloat(FONT_SIZE)
         scoreNode.fontName = FONT_NAME
@@ -125,29 +143,7 @@ class GameScene: SKScene {
         
         //add scoring bins
         addBins()
-        //add the items
-        run(
-            SKAction.repeatForever (
-                SKAction.sequence([
-                    SKAction.wait(forDuration: TimeInterval(1/difficulty)),
-                    SKAction.run({
-                        self.addItem()
-                        if self.itemsMissed > 100 {
-                            view.isPaused = true
-                            self.removeAction(forKey: "New Thread")
-                            //go to game over screen
-                        }
-                    })
-                ])
-            ),
-            withKey: "New Thread"
-        )
         
-        //        run(SKAction.repeat(SKAction.sequence([
-        //            SKAction.run(addItem),
-        //            SKAction.wait(forDuration: 1)
-        //        ]),
-        //        count: 10))
     }
     
     /*
@@ -159,8 +155,9 @@ class GameScene: SKScene {
             let touchedNodes = self.nodes(at: location)
             //reversed to select nodes that appear on top, first
             for node in touchedNodes.reversed(){
-                if node.name == "compost" || node.name == "recycle"{
+                if node.name == "compost" || node.name == "recycle"{    //only allow user to drag trash items
                     node.isPaused = true
+                    node.physicsBody?.isResting = true
                     self.touchToNode.updateValue(node, forKey: touch)
                     break
                 }
@@ -176,29 +173,24 @@ class GameScene: SKScene {
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches{
-            if let node = self.touchToNode[touch],
+            if let node = self.touchToNode[touch], //only get nodes that are a trash item
                (node.name == "compost") ||
-               (node.name == "recycle"){
-                //check if the item was placed in the right bin
-                if(compostBin.frame.contains(node.position)){
+                (node.name == "recycle"){
+                if(compostBin.frame.contains(node.position)){   //check if the item was placed in the right bin
                     score += 1
                     currentZ -= 1
-                    scoreNode.text = "\(score)"
-                    if (score == fallTime){
-                        difficulty += 1
-                        fallTime /= difficulty
+                    if (score%10 == 0){
+                        itemDropInterval *= ITEM_INTERVAL_MULTI
+                        itemSpeed *= ITEM_SPEED_MULTI
                     }
                     node.removeFromParent()
-                }else{//reset the movement of the node if it wasn't removed
-                    let moveAction = SKAction.move(by: CGVector(dx: 0,
-                                                                dy: -(SCREEN_HEIGHT + node.position.y)),
-                                                   duration: TimeInterval(fallTime))
-                    
-                    print("moved")
-                    node.run(moveAction)
+                } else {    //reset the movement of hte node if it wasn't removed
+                    node.physicsBody?.velocity = CGVector(dx: 0,
+                                                          dy: CGFloat(-itemSpeed))
                 }
             }
             self.touchToNode[touch]?.isPaused = false
+            self.touchToNode[touch]?.physicsBody?.isResting = false
             touchToNode.removeValue(forKey: touch)
         }
     }
@@ -213,14 +205,32 @@ class GameScene: SKScene {
     
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
+        let delta = currentTime - self.lastTimeInterval
+        self.lastTimeInterval = currentTime
+        self.itemDropCountdown -= delta
+        
+        if (self.itemDropCountdown <= 0) {
+            addItem()
+            self.itemDropCountdown = self.itemDropInterval
+        }
+    }
+    
+    /*
+     run after any of the physics changes
+     */
+    override func didSimulatePhysics() {
+        //only check endgame when physics changes -> contacts are made
+        if(itemsMissed >= 10){
+            self.view?.isPaused = true
+        }
     }
     
     
     /*
      random number generation
      */
-    func random() -> CGFloat{	
-        return CGFloat(Float(arc4random()) / 0xFFFFFFFF)
+    func random() -> CGFloat{
+        return CGFloat(Float(arc4random()) / Float(0xFFFFFFFF))
     }
     
     func random(min: CGFloat, max:CGFloat) -> CGFloat{
@@ -232,29 +242,28 @@ class GameScene: SKScene {
      */
     func addItem(){
         //create a new item with a random texture
-        let randomItem = items.randomElement()
-        let item = SKSpriteNode(texture: randomItem?.texture)
-        item.name = randomItem?.type
+        let randomItemTexture = itemTextures.randomElement()
+        let item = SKSpriteNode(texture: randomItemTexture?.texture)
+        item.name = randomItemTexture?.type.rawValue
         item.position = CGPoint(x: random(min: 0,
                                           max: SCREEN_WIDTH - item.size.width),
-                                y: random(min: SCREEN_HEIGHT,
-                                          max: SCREEN_HEIGHT + item.position.y * 2))
+                                y: SCREEN_HEIGHT + item.size.height)
         item.zPosition = CGFloat(currentZ)
         //set physics
         item.physicsBody = SKPhysicsBody(circleOfRadius: item.size.width/2)
-        item.physicsBody?.affectedByGravity = false
+        item.physicsBody?.affectedByGravity = true
         item.physicsBody?.categoryBitMask = PhysicsCategory.item
         item.physicsBody?.contactTestBitMask = PhysicsCategory.boundary
         item.physicsBody?.collisionBitMask = PhysicsCategory.none
         item.physicsBody?.isDynamic = true
+        item.physicsBody?.velocity = CGVector(dx: 0,
+                                              dy: CGFloat(-itemSpeed))
+        item.physicsBody?.linearDamping = 0
+        
         
         currentZ += 1
         addChild(item)
         
-        let moveAction = SKAction.move(by: CGVector(dx: 0,
-                                                    dy: -(SCREEN_HEIGHT + item.position.y)),
-                                       duration: TimeInterval(fallTime))
-        item.run(moveAction, withKey: "move")
         print("\(item.name ?? "nothing") added")
     }
     
@@ -280,14 +289,12 @@ extension GameScene: SKPhysicsContactDelegate{
         if contact.bodyA.categoryBitMask == PhysicsCategory.item {
             contact.bodyA.node?.removeFromParent()
             itemsMissed += 1
-            itemsMissedNode.text = "\(itemsMissed)"
             print("item removed")
         }
         
         if contact.bodyB.categoryBitMask == PhysicsCategory.item {
             contact.bodyB.node?.removeFromParent()
             itemsMissed += 1
-            itemsMissedNode.text = "\(itemsMissed)"
             print("item removed")
         }
     }
