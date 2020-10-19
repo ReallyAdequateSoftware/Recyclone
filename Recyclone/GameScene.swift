@@ -85,7 +85,7 @@ extension CGPoint {
 
 class GameScene: SKScene {
     
-    var itemTextures = Set<ItemTexture>()
+    var trashItemTextures = Set<ItemTexture>()
     var itemSpeed = Float(200)
     let ITEM_SPEED_MULTI = Float(1.15);
     var itemDropCountdown = TimeInterval(1)
@@ -124,14 +124,14 @@ class GameScene: SKScene {
         backgroundColor = SKColor.white
         //initialize trash item textures
         for i in 0..<NUM_OF_COMPOST_IMG{
-            itemTextures.insert( ItemTexture(texture: SKTexture(imageNamed: "compost/compost\(i)"),
+            trashItemTextures.insert( ItemTexture(texture: SKTexture(imageNamed: "compost/compost\(i)"),
                                type: ItemType.compost))
         }
         for i in 0..<NUM_OF_RECYCLE_IMG{
-            itemTextures.insert( ItemTexture(texture: SKTexture(imageNamed: "recycle/recycle\(i)"),
+            trashItemTextures.insert( ItemTexture(texture: SKTexture(imageNamed: "recycle/recycle\(i)"),
                                type: ItemType.recycle))
         }
-        print(itemTextures)
+        print(trashItemTextures)
         print("width: \(SCREEN_WIDTH)")
         print("height: \(SCREEN_HEIGHT)")
         
@@ -177,7 +177,8 @@ class GameScene: SKScene {
             let touchedNodes = self.nodes(at: location)
             //reversed to select nodes that appear on top, first
             for node in touchedNodes.reversed(){
-                if itemTextures.contains(((node as? Item)?.itemTexture)!){    //only allow user to drag trash items
+                if  node is Item &&
+                    trashItemTextures.contains(((node as? Item)?.itemTexture)!){    //only allow user to drag trash items
                     node.isPaused = true
                     node.physicsBody?.isResting = true
                     self.touchToNode.updateValue(node, forKey: touch)
@@ -264,7 +265,7 @@ class GameScene: SKScene {
      */
     func addItem(){
         //create a new item with a random texture
-        if let randomItemTexture = itemTextures.randomElement(){
+        if let randomItemTexture = trashItemTextures.randomElement(){
             let item = Item(itemTexture: randomItemTexture)
             item.name = randomItemTexture.type.rawValue
             item.position = CGPoint(x: random(min: 0,
