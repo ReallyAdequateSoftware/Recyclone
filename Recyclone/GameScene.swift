@@ -34,11 +34,13 @@ enum ItemType: String {
     case recycle
     case trash
     case compost
+    case none
 }
 class Item: SKSpriteNode{
-    var itemTexture: ItemTexture?
+    var itemTexture: ItemTexture
     
     override init(texture: SKTexture?, color: UIColor, size: CGSize) {
+        self.itemTexture = ItemTexture(texture: SKTexture(imageNamed: "not_found"), type: ItemType.none)
         super.init(texture: texture, color: color, size: size)
         self.physicsBody = SKPhysicsBody(circleOfRadius: self.size.width/2)
         self.physicsBody?.affectedByGravity = true
@@ -113,6 +115,7 @@ class GameScene: SKScene {
     let BOUNDARY_OUTSET = CGFloat(100)
     let FONT_SIZE = 30
     let FONT_NAME = "HelveticaNeue"
+    var itemTypeToBin = [ItemType : SKNode]()
     
     //map for associating individual touches with items
     private var touchToNode = [UITouch: SKNode]()
@@ -196,10 +199,12 @@ class GameScene: SKScene {
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches{
-            if let node = self.touchToNode[touch], //only get nodes that are a trash item
-               (node.name == "compost") ||
-                (node.name == "recycle"){
-                if(compostBin.frame.contains(node.position)){   //check if the item was placed in the right bin
+            if let node = self.touchToNode[touch] as? Item {    //only get nodes that are a trash item
+                
+                let texture = node.itemTexture
+                if  itemTypeToBin[texture.type] != nil &&
+                    itemTypeToBin[texture.type]!.frame.contains(node.position) { //check if the item was placed in the right bin
+                    
                     score += 1
                     currentZ -= 1
                     if (score%10 == 0){
@@ -207,7 +212,7 @@ class GameScene: SKScene {
                         itemSpeed *= ITEM_SPEED_MULTI
                     }
                     node.removeFromParent()
-                } else {    //reset the movement of hte node if it wasn't removed
+                } else {    //reset the movement of the node if it wasn't removed
                     node.physicsBody?.velocity = CGVector(dx: 0,
                                                           dy: CGFloat(-itemSpeed))
                 }
@@ -290,6 +295,7 @@ class GameScene: SKScene {
         compostBin.position = CGPoint(x: compostBin.size.width / 2,
                                       y: compostBin.size.height)
         compostBin.zPosition = CGFloat(-1)
+        itemTypeToBin.updateValue(compostBin, forKey: ItemType.compost)
         addChild(compostBin)
     }
     
