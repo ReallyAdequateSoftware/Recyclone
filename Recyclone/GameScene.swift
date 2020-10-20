@@ -106,11 +106,12 @@ class GameScene: SKScene {
     }
     var scoreNode = SKLabelNode()
     var itemsMissedNode = SKLabelNode()
-    let NUM_OF_RECYCLE_IMG = 0
+    let NUM_OF_RECYCLE_IMG = 1
     let NUM_OF_COMPOST_IMG = 1
     let SCREEN_WIDTH = UIScreen.main.bounds.size.width
     let SCREEN_HEIGHT = UIScreen.main.bounds.size.height
     var compostBin = SKSpriteNode()
+    var recycleBin = SKSpriteNode()
     var currentZ = 0
     let BOUNDARY_OUTSET = CGFloat(100)
     let FONT_SIZE = 30
@@ -292,11 +293,18 @@ class GameScene: SKScene {
      */
     func addBins(){
         compostBin = SKSpriteNode(imageNamed: "compost_bin")
-        compostBin.position = CGPoint(x: compostBin.size.width / 2,
+        compostBin.position = CGPoint(x: compostBin.size.width * 0.75,
                                       y: compostBin.size.height)
         compostBin.zPosition = CGFloat(-1)
         itemTypeToBin.updateValue(compostBin, forKey: ItemType.compost)
         addChild(compostBin)
+        
+        recycleBin = SKSpriteNode(imageNamed: "recycle_bin")
+        recycleBin.position = CGPoint(x: SCREEN_WIDTH - recycleBin.size.width * 0.75,
+                                    y: recycleBin.size.height)
+        recycleBin.zPosition = CGFloat(-1)
+        itemTypeToBin.updateValue(recycleBin, forKey: ItemType.recycle)
+        addChild(recycleBin)
     }
     
 }
