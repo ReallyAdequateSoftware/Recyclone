@@ -11,17 +11,15 @@ import SpriteKit
 class MainMenuScene: SKScene {
     
     let button = SKSpriteNode(imageNamed: "compost_bin")
+    var touchToNode = [UITouch: SKNode]()
     
     override init(size: CGSize) {
         super.init(size: size)
         
-        // 1
         backgroundColor = SKColor.green
         
-        // 2
         let message = "Recyclone"
         
-        // 3
         let label = SKLabelNode(fontNamed: "Chalkduster")
         label.text = message
         label.fontSize = 40
@@ -34,42 +32,48 @@ class MainMenuScene: SKScene {
         button.size.width = 100
         button.position = CGPoint(x: self.frame.midX, y: self.frame.midY - 100)
         self.addChild(button)
-        /*
-         run(SKAction.sequence([
-         SKAction.wait(forDuration: 3.0),
-         SKAction.run() { [weak self] in
-         // 5
-         guard let `self` = self else { return }
-         let reveal = SKTransition.flipHorizontal(withDuration: 0.5)
-         let scene = GameScene(size: size)
-         self.view?.presentScene(scene, transition:reveal)
-         }
-         ]))
-         */
+        
     }
     
-    // 6
     required init(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        let touch = touches.first
-        let positionInScene = touch!.location(in: self)
-        let touchedNode = self.atPoint(positionInScene)
         
-        if let name = touchedNode.name {
-            if name == "btn" {
-                
-                let reveal = SKTransition.reveal(with: .down,
-                                                 duration: 1)
-                let newScene = GameScene(size: view!.frame.size)
-                
-                scene?.view!.presentScene(newScene,
-                                        transition: reveal)
-                
-                
+        for touch in touches {
+            let positionInScene = touch.location(in: self)
+            let touchedNode = self.atPoint(positionInScene)
+            
+            // associate touches with the buttons they pressed
+            if  touchedNode.name == "btn" &&
+                    touchedNode.contains(positionInScene) {
+                touchToNode.updateValue(touchedNode, forKey: touch)
             }
         }
     }
+    
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        
+    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        
+        for touch in touches {
+            // if the touch started and ended on the same node, call the nodes action
+            //TODO: write function that takes a node and returns an action to run when the node is pressed
+            if let previouslyTouched = touchToNode[touch] {
+                if previouslyTouched.contains(touch.location(in: self)) {
+                    
+                    let reveal = SKTransition.reveal(with: .down,
+                                                     duration: 1)
+                    let newScene = GameScene(size: view!.frame.size)
+                    
+                    scene?.view!.presentScene(newScene,
+                                              transition: reveal)
+                }
+            }
+        }
+    }
+    
 }
