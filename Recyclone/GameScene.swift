@@ -117,6 +117,7 @@ class GameScene: SKScene {
     let FONT_SIZE = 30
     let FONT_NAME = "HelveticaNeue"
     var itemTypeToBin = [ItemType : SKNode]()
+    let hapticFeedback = UINotificationFeedbackGenerator()
     
     //map for associating individual touches with items
     private var touchToNode = [UITouch: SKNode]()
@@ -199,6 +200,7 @@ class GameScene: SKScene {
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        self.hapticFeedback.prepare()
         for touch in touches{
             if let node = self.touchToNode[touch] as? Item {    //only get nodes that are a trash item
                 
@@ -214,6 +216,7 @@ class GameScene: SKScene {
                     }
                     node.removeFromParent()
                 } else {    //reset the movement of the node if it wasn't removed
+                    hapticFeedback.notificationOccurred(.error)
                     node.physicsBody?.velocity = CGVector(dx: 0,
                                                           dy: CGFloat(-itemSpeed))
                 }
@@ -317,12 +320,14 @@ extension GameScene: SKPhysicsContactDelegate{
         //remove the item if it contacted the boundary
         if contact.bodyA.categoryBitMask == PhysicsCategory.item {
             contact.bodyA.node?.removeFromParent()
+            self.hapticFeedback.notificationOccurred(.warning)
             itemsMissed += 1
             print("item removed")
         }
         
         if contact.bodyB.categoryBitMask == PhysicsCategory.item {
             contact.bodyB.node?.removeFromParent()
+            self.hapticFeedback.notificationOccurred(.warning)
             itemsMissed += 1
             print("item removed")
         }
