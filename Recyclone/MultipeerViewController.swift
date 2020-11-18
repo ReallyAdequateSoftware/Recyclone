@@ -25,9 +25,12 @@ class MultipeerViewController: UICollectionViewController, MCSessionDelegate, UI
         
         super.viewDidLoad()
 
-        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(showConnectionPrompt))
+        self.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(showConnectionPrompt))
         title = "Selfie Share"
-        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .camera, target: self, action: #selector(importPicture))
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .camera, target: self, action: #selector(importPicture))
+        // because we used custom nav bar items, we need to force the back button to appear
+        self.navigationItem.leftItemsSupplementBackButton = true;
+        
         mcSession = MCSession(peer: peerID, securityIdentity: nil, encryptionPreference: .required)
         mcSession?.delegate = self
          
@@ -144,6 +147,12 @@ class MultipeerViewController: UICollectionViewController, MCSessionDelegate, UI
         @unknown default:
             print("Unknown state received: \(peerID.displayName)")
         }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        // display the nav bar when we go to the multipeer view
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: animated)
     }
     
     func browserViewControllerDidFinish(_ browserViewController: MCBrowserViewController) {

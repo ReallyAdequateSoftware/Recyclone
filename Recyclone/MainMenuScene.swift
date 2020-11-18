@@ -8,11 +8,15 @@
 import Foundation
 import SpriteKit
 
+func  *(left: CGSize, right: Double) -> CGSize {
+    return CGSize(width: Double(left.width) * right, height: Double(left.height) * right)
+}
+
 class MainMenuScene: SKScene {
     
     let button = SKSpriteNode(imageNamed: "compost_bin")
-    var multiPeerButton = SKSpriteNode(color: .gray,
-                                       size: CGSize(width: 200, height: 200))
+    var multiPeerButtonText = SKLabelNode(text: "Start Multipeer")
+    var multiPeerButtonShape = SKShapeNode()
     var touchToNode = [UITouch: SKNode]()
     
     override init(size: CGSize) {
@@ -33,9 +37,23 @@ class MainMenuScene: SKScene {
         button.position = CGPoint(x: self.frame.midX, y: self.frame.midY - 100)
         self.addChild(button)
         
-        multiPeerButton.name = "startMultipeer"
-        multiPeerButton.position = CGPoint(x: 0, y: 0)
-        self.addChild(multiPeerButton)
+        let mpButtonLocation = CGPoint(x: self.frame.midX, y: 200)
+        multiPeerButtonText.fontColor = SKColor.lightGray
+        multiPeerButtonText.horizontalAlignmentMode = .center
+        multiPeerButtonText.position = mpButtonLocation
+        
+        multiPeerButtonShape = SKShapeNode(rect: CGRect(origin: CGPoint(x: multiPeerButtonText.frame.origin.x / 1.15,
+                                                                        y: multiPeerButtonText.frame.origin.y),
+                                                        size: multiPeerButtonText.frame.size * 1.15),
+                                           cornerRadius: 10)
+        multiPeerButtonShape.fillColor = SKColor.darkGray
+        multiPeerButtonShape.strokeColor = SKColor.darkGray
+        multiPeerButtonShape.name = "startMultipeer"
+
+        
+        self.addChild(multiPeerButtonText)
+        self.addChild(multiPeerButtonShape)
+        
         
     }
     
@@ -78,20 +96,17 @@ class MainMenuScene: SKScene {
                                                   transition: reveal)
                     } else if previouslyTouched.name == "startMultipeer" {
                         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-                        let vc = storyboard.instantiateViewController(withIdentifier: "MultipeerViewController") as! MultipeerViewController
+                        let mpViewController = storyboard.instantiateViewController(withIdentifier: "MultipeerViewController") as! MultipeerViewController
                         
-                        vc.view.frame = (self.view?.frame)!
-                        vc.view.layoutIfNeeded()
+                        mpViewController.view.frame = (self.view?.frame)!
+                        mpViewController.view.layoutIfNeeded()
 
-                        UIView.transition(with: self.view!, duration: 0.3, options: .transitionFlipFromRight, animations:
-                                            {
-                                                if let navVC = self.view!.window!.rootViewController as? UINavigationController {
-                                                    navVC.pushViewController(vc, animated: true)
-                                                }
+                        if let navViewController = self.view!.window!.rootViewController as? UINavigationController {
+                            // back button must be added to the previous VC
+                            navViewController.navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
+                            navViewController.pushViewController(mpViewController, animated: true)
+                        }
 
-                                            }, completion: { completed in
-
-                                            })
                     }
                     
                 }

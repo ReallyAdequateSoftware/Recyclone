@@ -26,10 +26,16 @@ class GameViewController: UIViewController {
         skView.ignoresSiblingOrder = true
         scene.scaleMode = .resizeFill
         skView.presentScene(scene)
-        
+                
          
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        // make the nav bar disappear when we go back to the main menu
+        navigationController?.setNavigationBarHidden(true, animated: animated)
+    }
+    
     override var shouldAutorotate: Bool {
         return true
     }
