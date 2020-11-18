@@ -28,7 +28,7 @@ class GameViewController: UIViewController {
             view.presentScene(scene)
         }
  */
-        let scene = GameScene(size: view.frame.size)
+        let scene = MainMenuScene(size: view.frame.size)
         //let scene = GameScene(size: view.bounds.size)
         print(view.bounds.size.height)
         print(view.bounds.size.height)
