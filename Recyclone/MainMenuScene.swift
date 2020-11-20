@@ -14,15 +14,19 @@ func  *(left: CGSize, right: Double) -> CGSize {
 
 class MainMenuScene: SKScene {
     
+    var appDelegate = UIApplication.shared.delegate as! AppDelegate
     let button = SKSpriteNode(imageNamed: "compost_bin")
     var multiPeerButtonText = SKLabelNode(text: "Start Multipeer")
     var multiPeerButtonShape = SKShapeNode()
+    var sendDataButton = SKShapeNode()
     var touchToNode = [UITouch: SKNode]()
+    var gameScene: GameScene?
     
     override init(size: CGSize) {
         super.init(size: size)
         
-        backgroundColor = SKColor.systemBlue
+        self.backgroundColor = SKColor.systemBlue
+        gameScene = GameScene(size: size)
         
         let label = SKLabelNode(fontNamed: "Chalkduster")
         label.text = "Recyclone"
@@ -49,7 +53,12 @@ class MainMenuScene: SKScene {
         multiPeerButtonShape.fillColor = SKColor.darkGray
         multiPeerButtonShape.strokeColor = SKColor.darkGray
         multiPeerButtonShape.name = "startMultipeer"
-
+        
+        sendDataButton = SKShapeNode(circleOfRadius: 50)
+        sendDataButton.position = CGPoint(x: self.frame.midX, y: 50)
+        sendDataButton.fillColor = SKColor.darkGray
+        sendDataButton.name = "sendData"
+        self.addChild(sendDataButton)
         
         self.addChild(multiPeerButtonText)
         self.addChild(multiPeerButtonShape)
@@ -69,7 +78,7 @@ class MainMenuScene: SKScene {
             
             // associate touches with the buttons they pressed
             //TODO: use set to track button names
-            if  (touchedNode.name == "btn" || touchedNode.name == "startMultipeer") &&
+            if  (touchedNode.name == "btn" || touchedNode.name == "startMultipeer" || touchedNode.name == "sendData") &&
                     touchedNode.contains(positionInScene) {
                 touchToNode.updateValue(touchedNode, forKey: touch)
             }
@@ -90,23 +99,29 @@ class MainMenuScene: SKScene {
                     if previouslyTouched.name == "btn" {
                         let reveal = SKTransition.reveal(with: .down,
                                                          duration: 1)
-                        let newScene = GameScene(size: view!.frame.size)
                         
-                        scene?.view!.presentScene(newScene,
-                                                  transition: reveal)
+                        self.scene?.view!.presentScene(self.gameScene!, transition: reveal)
+                        
                     } else if previouslyTouched.name == "startMultipeer" {
-                        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-                        let mpViewController = storyboard.instantiateViewController(withIdentifier: "MultipeerViewController") as! MultipeerViewController
+                        var wrangler = self.appDelegate.multipeerWrangler
+                        wrangler?.startHosting()
+                        wrangler?.joinSession()
                         
-                        mpViewController.view.frame = (self.view?.frame)!
-                        mpViewController.view.layoutIfNeeded()
-
-                        if let navViewController = self.view!.window!.rootViewController as? UINavigationController {
-                            // back button must be added to the previous VC
-                            navViewController.navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
-                            navViewController.pushViewController(mpViewController, animated: true)
+                    } else if previouslyTouched.name == "sendData" {
+                        var wrangler = self.appDelegate.multipeerWrangler
+                        if let d = "test data".data(using: .utf8) {
+                            do {
+                                print("sending data to \(wrangler?.mcSession!.connectedPeers)")
+                                try wrangler?.mcSession?.send(d as Data, toPeers: (wrangler?.mcSession!.connectedPeers)!, with: .reliable)
+                            } catch {
+                                print("error while sending")
+                            }
                         }
-
+                        
+                        if let data = wrangler?.data {
+                            
+                            print("\(String(data: data, encoding: .utf8))")
+                        }
                     }
                     
                 }
