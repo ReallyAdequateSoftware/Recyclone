@@ -62,8 +62,7 @@ class MainMenuScene: SKScene {
         
         self.addChild(multiPeerButtonText)
         self.addChild(multiPeerButtonShape)
-        
-        
+
     }
     
     required init(coder aDecoder: NSCoder) {
@@ -123,7 +122,7 @@ class MainMenuScene: SKScene {
                             print("\(String(data: data, encoding: .utf8))")
                         }
                     }
-                    
+
                 }
             }
         }
