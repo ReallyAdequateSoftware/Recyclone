@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		0F7F1E53253F775D003D6DA6 /* MainMenuScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F7F1E52253F775D003D6DA6 /* MainMenuScene.swift */; };
+		16407D2B2564CE6F000CF628 /* MultipeerWrangler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16407D2A2564CE6F000CF628 /* MultipeerWrangler.swift */; };
+		16407D2C2564CE6F000CF628 /* MultipeerWrangler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16407D2A2564CE6F000CF628 /* MultipeerWrangler.swift */; };
+		16407D2D2564CE6F000CF628 /* MultipeerWrangler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16407D2A2564CE6F000CF628 /* MultipeerWrangler.swift */; };
 		1666849B25227DAF00BBC221 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1666849A25227DAF00BBC221 /* AppDelegate.swift */; };
 		1666849F25227DAF00BBC221 /* Actions.sks in Resources */ = {isa = PBXBuildFile; fileRef = 1666849E25227DAF00BBC221 /* Actions.sks */; };
 		166684A125227DAF00BBC221 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 166684A025227DAF00BBC221 /* GameScene.swift */; };
@@ -38,6 +41,7 @@
 
 /* Begin PBXFileReference section */
 		0F7F1E52253F775D003D6DA6 /* MainMenuScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuScene.swift; sourceTree = "<group>"; };
+		16407D2A2564CE6F000CF628 /* MultipeerWrangler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipeerWrangler.swift; sourceTree = "<group>"; };
 		1666849725227DAF00BBC221 /* Recyclone.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Recyclone.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1666849A25227DAF00BBC221 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1666849E25227DAF00BBC221 /* Actions.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Actions.sks; sourceTree = "<group>"; };
@@ -109,6 +113,7 @@
 				166684A025227DAF00BBC221 /* GameScene.swift */,
 				166684A225227DAF00BBC221 /* GameViewController.swift */,
 				0F7F1E52253F775D003D6DA6 /* MainMenuScene.swift */,
+				16407D2A2564CE6F000CF628 /* MultipeerWrangler.swift */,
 				166684A425227DAF00BBC221 /* Main.storyboard */,
 				166684A725227DB100BBC221 /* Assets.xcassets */,
 				166684A925227DB100BBC221 /* Info.plist */,
@@ -268,6 +273,7 @@
 				166684A125227DAF00BBC221 /* GameScene.swift in Sources */,
 				166684A325227DAF00BBC221 /* GameViewController.swift in Sources */,
 				0F7F1E53253F775D003D6DA6 /* MainMenuScene.swift in Sources */,
+				16407D2B2564CE6F000CF628 /* MultipeerWrangler.swift in Sources */,
 				1666849B25227DAF00BBC221 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -276,6 +282,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				16407D2C2564CE6F000CF628 /* MultipeerWrangler.swift in Sources */,
 				166684B325227DB100BBC221 /* RecycloneTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -284,6 +291,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				16407D2D2564CE6F000CF628 /* MultipeerWrangler.swift in Sources */,
 				166684BE25227DB100BBC221 /* RecycloneUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

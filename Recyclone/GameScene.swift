@@ -7,6 +7,7 @@
 
 import SpriteKit
 import GameplayKit
+import MultipeerConnectivity
 
 func +(left: CGPoint, right: CGPoint) -> CGPoint {
     return CGPoint(x: left.x + right.x, y: left.y + right.y)
@@ -84,9 +85,9 @@ extension CGPoint {
     }
 }
 
-
 class GameScene: SKScene {
     
+    var appDelegate = UIApplication.shared.delegate as! AppDelegate
     var trashItemTextures = Set<ItemTexture>()
     var itemSpeed = Float(200)
     let ITEM_SPEED_MULTI = Float(1.15);

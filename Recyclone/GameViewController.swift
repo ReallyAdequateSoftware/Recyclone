@@ -10,26 +10,12 @@ import SpriteKit
 import GameplayKit
 
 class GameViewController: UIViewController {
-
+    
     override func viewDidLoad() {
         
         super.viewDidLoad()
         
-        /*
-        if let view = self.view as! SKView? {
-            // Load the SKScene from 'GameScene.sks'
-            let scene = GameScene(size: view.bounds.size)
-            // Set the scale mode to scale to fit the window
-            scene.scaleMode = .resizeFill
-            // Present the scene
-            view.ignoresSiblingOrder = true
-            view.showsFPS = true
-            view.showsNodeCount = true
-            view.presentScene(scene)
-        }
- */
         let scene = MainMenuScene(size: view.frame.size)
-        //let scene = GameScene(size: view.bounds.size)
         print(view.bounds.size.height)
         print(view.bounds.size.height)
         print(view.frame.size)
@@ -43,6 +29,12 @@ class GameViewController: UIViewController {
          
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        // make the nav bar disappear when we go back to the main menu
+        navigationController?.setNavigationBarHidden(true, animated: animated)
+    }
+    
     override var shouldAutorotate: Bool {
         return true
     }
@@ -56,6 +48,10 @@ class GameViewController: UIViewController {
     }
 
     override var prefersStatusBarHidden: Bool {
+        return true
+    }
+    
+    override var prefersHomeIndicatorAutoHidden: Bool {
         return true
     }
 }
