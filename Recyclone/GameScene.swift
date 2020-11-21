@@ -119,6 +119,7 @@ class GameScene: SKScene {
     let FONT_NAME = "HelveticaNeue"
     var itemTypeToBin = [ItemType : SKNode]()
     let hapticFeedback = UINotificationFeedbackGenerator()
+    let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
     
     //map for associating individual touches with items
     private var touchToNode = [UITouch: SKNode]()
@@ -209,6 +210,7 @@ class GameScene: SKScene {
                 if  itemTypeToBin[texture.type] != nil &&
                     itemTypeToBin[texture.type]!.frame.contains(node.position) { //check if the item was placed in the right bin
                     
+                    impactFeedback.impactOccurred()
                     score += 1
                     currentZ -= 1
                     if (score%10 == 0){
@@ -217,7 +219,6 @@ class GameScene: SKScene {
                     }
                     node.removeFromParent()
                 } else {    //reset the movement of the node if it wasn't removed
-                    hapticFeedback.notificationOccurred(.error)
                     node.physicsBody?.velocity = CGVector(dx: 0,
                                                           dy: CGFloat(-itemSpeed))
                 }
