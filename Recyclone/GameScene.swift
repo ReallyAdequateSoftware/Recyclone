@@ -8,6 +8,7 @@
 import SpriteKit
 import GameplayKit
 import MultipeerConnectivity
+import GameKit
 
 func +(left: CGPoint, right: CGPoint) -> CGPoint {
     return CGPoint(x: left.x + right.x, y: left.y + right.y)
@@ -57,7 +58,7 @@ class Item: SKSpriteNode{
         self.itemTexture = itemTexture
     }
     required init(coder aDecoder: NSCoder) {
-            fatalError("init(coder:) has not been implemented")
+        fatalError("init(coder:) has not been implemented")
     }
 }
 
@@ -132,11 +133,11 @@ class GameScene: SKScene {
         //initialize trash item textures
         for i in 0..<NUM_OF_COMPOST_IMG{
             trashItemTextures.insert( ItemTexture(texture: SKTexture(imageNamed: "compost/compost\(i)"),
-                               type: ItemType.compost))
+                                                  type: ItemType.compost))
         }
         for i in 0..<NUM_OF_RECYCLE_IMG{
             trashItemTextures.insert( ItemTexture(texture: SKTexture(imageNamed: "recycle/recycle\(i)"),
-                               type: ItemType.recycle))
+                                                  type: ItemType.recycle))
         }
         print(trashItemTextures)
         print("width: \(SCREEN_WIDTH)")
@@ -185,7 +186,7 @@ class GameScene: SKScene {
             //reversed to select nodes that appear on top, first
             for node in touchedNodes.reversed(){
                 if  node is Item &&
-                    trashItemTextures.contains(((node as? Item)?.itemTexture)!){    //only allow user to drag trash items
+                        trashItemTextures.contains(((node as? Item)?.itemTexture)!){    //only allow user to drag trash items
                     node.isPaused = true
                     node.physicsBody?.isResting = true
                     self.touchToNode.updateValue(node, forKey: touch)
@@ -208,7 +209,7 @@ class GameScene: SKScene {
                 
                 let texture = node.itemTexture
                 if  itemTypeToBin[texture.type] != nil &&
-                    itemTypeToBin[texture.type]!.frame.contains(node.position) { //check if the item was placed in the right bin
+                        itemTypeToBin[texture.type]!.frame.contains(node.position) { //check if the item was placed in the right bin
                     
                     impactFeedback.impactOccurred()
                     score += 1
@@ -255,6 +256,17 @@ class GameScene: SKScene {
     override func didSimulatePhysics() {
         //only check endgame when physics changes -> contacts are made
         if(itemsMissed >= 10){
+            if (GKLocalPlayer.local.isAuthenticated) {
+                let gkScore = GKScore(leaderboardIdentifier: "com.highscore.Recyclone")
+                gkScore.value = Int64(score)
+                GKScore.report([gkScore]) { (error) in
+                    if error != nil {
+                        print(error!.localizedDescription)
+                    } else {
+                        print("High Score submitted to your Leaderboard!")
+                    }
+                }
+            }
             self.view?.isPaused = true
         }
     }
@@ -306,7 +318,7 @@ class GameScene: SKScene {
         
         recycleBin = SKSpriteNode(imageNamed: "recycle_bin")
         recycleBin.position = CGPoint(x: SCREEN_WIDTH - recycleBin.size.width * 0.75,
-                                    y: recycleBin.size.height)
+                                      y: recycleBin.size.height)
         recycleBin.zPosition = CGFloat(-1)
         itemTypeToBin.updateValue(recycleBin, forKey: ItemType.recycle)
         addChild(recycleBin)
