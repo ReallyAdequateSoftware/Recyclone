@@ -25,13 +25,6 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate {
     /* Variables */
     var gcEnabled = Bool() // Check if the user has Game Center enabled
     var gcDefaultLeaderBoard = String() // Check the default leaderboardID
-         
-    var score = 0 {
-        didSet {
-            scoreLabel.text = "\(score)"
-        }
-    }
-    let scoreLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 21))
 
          
     // IMPORTANT: replace the red string below with your own Leaderboard ID (the one you've set in iTunes Connect)
@@ -85,23 +78,6 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate {
         }
     }
     
-    // MARK: - ADD 10 POINTS TO THE SCORE AND SUBMIT THE UPDATED SCORE TO GAME CENTER
-    @IBAction func addScoreAndSubmitToGC(_ sender: AnyObject) {
-        // Add 10 points to current score
-        score += 10
-        scoreLabel.text = "\(score)"
-     
-        // Submit score to GC leaderboard
-        let bestScoreInt = GKScore(leaderboardIdentifier: LEADERBOARD_ID)
-        bestScoreInt.value = Int64(score)
-        GKScore.report([bestScoreInt]) { (error) in
-            if error != nil {
-                print(error!.localizedDescription)
-            } else {
-                print("Best Score submitted to your Leaderboard!")
-            }
-        }
-    }
     
     // Delegate to dismiss the GC controller
     func gameCenterViewControllerDidFinish(_ gameCenterViewController: GKGameCenterViewController) {
