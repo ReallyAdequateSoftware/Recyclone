@@ -42,16 +42,22 @@ class Button {
     }
 }
 
+protocol GCWrangler {
+    func showLeaderboard()
+}
+
 class MainMenuScene: SKScene {
     
     var appDelegate = UIApplication.shared.delegate as! AppDelegate
     var startButton: Button!
     var multiPeerButton: Button!
     var sendDataButton: Button!
+    var showLeaderboardButton: Button!
     var touchToNode = [UITouch: SKNode]()
     var gameScene: GameScene?
     var buttonNames = Set<String>()
     let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+    var gcWranglerDelegate: GCWrangler?
         
     override init(size: CGSize) {
         super.init(size: size)
@@ -77,6 +83,10 @@ class MainMenuScene: SKScene {
         sendDataButton = Button(label: "Send Data", location: CGPoint(x: self.frame.midX, y: self.frame.midY - 200))
         self.addChild(sendDataButton.shape)
         buttonNames.insert(sendDataButton.name)
+        
+        showLeaderboardButton = Button(label: "Leaderboard", location: CGPoint(x: self.frame.midX, y: self.frame.midY - 300))
+        self.addChild(showLeaderboardButton.shape)
+        buttonNames.insert(showLeaderboardButton.name)
 
     }
     
@@ -140,6 +150,8 @@ class MainMenuScene: SKScene {
                             
                             print("\(String(data: data, encoding: .utf8))")
                         }
+                    } else if previouslyTouched.name == "Leaderboard" {
+                        self.gcWranglerDelegate?.showLeaderboard()
                     }
                     impactFeedback.impactOccurred()
 
