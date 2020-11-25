@@ -25,13 +25,6 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate {
     /* Variables */
     var gcEnabled = Bool() // Check if the user has Game Center enabled
     var gcDefaultLeaderBoard = String() // Check the default leaderboardID
-         
-    var score = 0 {
-        didSet {
-            scoreLabel.text = "\(score)"
-        }
-    }
-    let scoreLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 21))
 
          
     // IMPORTANT: replace the red string below with your own Leaderboard ID (the one you've set in iTunes Connect)
