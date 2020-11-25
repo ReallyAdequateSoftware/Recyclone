@@ -78,7 +78,6 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate {
         }
     }
     
-    
     // Delegate to dismiss the GC controller
     func gameCenterViewControllerDidFinish(_ gameCenterViewController: GKGameCenterViewController) {
         gameCenterViewController.dismiss(animated: true, completion: nil)
