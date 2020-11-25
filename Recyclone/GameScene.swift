@@ -165,6 +165,7 @@ class GameScene: SKScene {
         //setup scoring
         scoreNode.position = CGPoint(x: SCREEN_WIDTH * 0.25,
                                      y: SCREEN_HEIGHT - BOUNDARY_OUTSET)
+        scoreNode.zPosition = CGFloat(ZPositions.background.rawValue)
         scoreNode.text = "\(score)"
         scoreNode.fontColor = UIColor.green
         scoreNode.fontSize = CGFloat(FONT_SIZE)
@@ -174,6 +175,7 @@ class GameScene: SKScene {
         itemsMissedNode.text = "\(itemsMissed)"
         itemsMissedNode.position = CGPoint(x: SCREEN_WIDTH * 0.75,
                                            y: SCREEN_HEIGHT - BOUNDARY_OUTSET)
+        itemsMissedNode.zPosition = CGFloat(ZPositions.background.rawValue)
         itemsMissedNode.fontColor = UIColor.red
         itemsMissedNode.fontSize = CGFloat(FONT_SIZE)
         itemsMissedNode.fontName = FONT_NAME
@@ -243,18 +245,20 @@ class GameScene: SKScene {
             } else if let node = self.touchToNode[touch] {
                 if node.contains(touch.location(in: self)) {
                     if node.name == "Retry" {
+                        
                         self.view?.isPaused = false
                         let retryScene = GameScene(size: self.size)
                         retryScene.scaleMode = self.scaleMode
-                        let animation = SKTransition.fade(withDuration: 1.0)
-                        self.scene?.view!.presentScene(retryScene, transition: animation)
-                        
+                        // TODO: find out why this transition doesnt work
+                        let animation = SKTransition.crossFade(withDuration: TimeInterval(1.0))
+                        self.view?.presentScene(retryScene, transition: animation)
                     } else if node.name == "Main Menu" {
+                        
                         self.view?.isPaused = false
                         let mainMenuScene = MainMenuScene(size: self.size)
                         mainMenuScene.scaleMode = self.scaleMode
-                        let animation = SKTransition.fade(withDuration: 1.0)
-                        self.scene?.view!.presentScene(mainMenuScene, transition: animation)
+                        let animation = SKTransition.crossFade(withDuration: TimeInterval(1.0))
+                        self.view?.presentScene(mainMenuScene, transition: animation)
                     }
                     self.impactFeedback.impactOccurred()
                 }
