@@ -115,8 +115,8 @@ class GameScene: SKScene {
     }
     var scoreNode = SKLabelNode()
     var itemsMissedNode = SKLabelNode()
-    let NUM_OF_RECYCLE_IMG = 1
-    let NUM_OF_COMPOST_IMG = 1
+    let NUM_OF_RECYCLE_IMG = 4
+    let NUM_OF_COMPOST_IMG = 4
     let SCREEN_WIDTH = UIScreen.main.bounds.size.width
     let SCREEN_HEIGHT = UIScreen.main.bounds.size.height
     var compostBin = SKSpriteNode()
