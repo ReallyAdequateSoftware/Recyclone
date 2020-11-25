@@ -92,8 +92,8 @@ class MainMenuScene: SKScene {
             if let previouslyTouched = touchToNode[touch] {
                 if previouslyTouched.contains(touch.location(in: self)) {
                     if previouslyTouched.name == "Start" {
-                        let reveal = SKTransition.reveal(with: .down,
-                                                         duration: 1)
+                        
+                        let reveal = SKTransition.crossFade(withDuration: TimeInterval(1.0))
                         let gameScene = GameScene(size: self.size)
                         self.scene?.view!.presentScene(gameScene, transition: reveal)
                         
