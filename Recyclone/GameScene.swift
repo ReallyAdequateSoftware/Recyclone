@@ -129,6 +129,7 @@ class GameScene: SKScene {
     let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
     var retryButton: Button?
     var mainMenuButton: Button?
+    var isPlaying = true
     
     //map for associating individual touches with items
     private var touchToNode = [UITouch: SKNode]()
@@ -147,9 +148,6 @@ class GameScene: SKScene {
             trashItemTextures.insert( ItemTexture(texture: SKTexture(imageNamed: "recycle/recycle\(i)"),
                                                   type: ItemType.recycle))
         }
-        print(trashItemTextures)
-        print("width: \(SCREEN_WIDTH)")
-        print("height: \(SCREEN_HEIGHT)")
         
         //setup boundary removal physics for performance and game over mechanism
         physicsWorld.gravity = CGVector(dx: 0, dy: 0)
@@ -181,6 +179,11 @@ class GameScene: SKScene {
         itemsMissedNode.fontName = FONT_NAME
         addChild(itemsMissedNode)
         
+        retryButton = Button(label: "Retry", location: CGPoint(x: self.frame.midX, y: self.frame.midY + 50))
+        retryButton?.shape.zPosition = CGFloat(ZPositions.foreground.rawValue)
+        mainMenuButton = Button(label: "Main Menu", location: CGPoint(x: self.frame.midX, y: self.frame.midY - 50))
+        mainMenuButton?.shape.zPosition = CGFloat(ZPositions.foreground.rawValue)
+        
         //add scoring bins
         addBins()
         
@@ -202,8 +205,7 @@ class GameScene: SKScene {
                     node.physicsBody?.isResting = true
                     self.touchToNode.updateValue(node, forKey: touch)
                     break
-                } else if node.name == "Retry" || node.name == "Main Menu" &&
-                            node.contains(location) {
+                } else if node.name == "Retry" || node.name == "Main Menu" {
                     impactFeedback.impactOccurred()
                     self.touchToNode.updateValue(node, forKey: touch)
                 }
@@ -213,14 +215,17 @@ class GameScene: SKScene {
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches{
-            touchToNode[touch]?.position = touch.location(in: self)
+            if touchToNode[touch] is Item {
+                touchToNode[touch]?.position = touch.location(in: self)
+            }
+            
         }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         self.impactFeedback.prepare()
         
-        for touch in touches{
+        for touch in touches {
             if let node = self.touchToNode[touch] as? Item {    //only get nodes that are a trash item
                 
                 let texture = node.itemTexture
@@ -244,23 +249,17 @@ class GameScene: SKScene {
                 touchToNode.removeValue(forKey: touch)
             } else if let node = self.touchToNode[touch] {
                 if node.contains(touch.location(in: self)) {
-                    if node.name == "Retry" {
-                        
+                    if node.name == "Retry" || node.name == "Main Menu" {
+                        let nextScene = node.name == "Retry" ? GameScene(size: self.size): MainMenuScene(size: self.size)
                         self.view?.isPaused = false
-                        let retryScene = GameScene(size: self.size)
-                        retryScene.scaleMode = self.scaleMode
+                        nextScene.scaleMode = self.scaleMode
                         // TODO: find out why this transition doesnt work
                         let animation = SKTransition.crossFade(withDuration: TimeInterval(1.0))
-                        self.view?.presentScene(retryScene, transition: animation)
-                    } else if node.name == "Main Menu" {
-                        
-                        self.view?.isPaused = false
-                        let mainMenuScene = MainMenuScene(size: self.size)
-                        mainMenuScene.scaleMode = self.scaleMode
-                        let animation = SKTransition.crossFade(withDuration: TimeInterval(1.0))
-                        self.view?.presentScene(mainMenuScene, transition: animation)
+                        cleanUp()
+                        self.view?.presentScene(nextScene, transition: animation)
                     }
                     self.impactFeedback.impactOccurred()
+                    touchToNode.removeValue(forKey: touch)
                 }
             }
             
@@ -274,6 +273,22 @@ class GameScene: SKScene {
         }
     }
     
+    deinit {
+        print("denitialized")
+    }
+    
+    func cleanUp() {
+        for child in self.children {
+            print("clearing \(child)")
+            child.removeAllActions()
+            child.removeAllChildren()
+            child.removeFromParent()
+        }
+        self.isPlaying = false
+        self.retryButton = nil
+        self.mainMenuButton = nil
+        self.itemsMissed = 0
+    }
     
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
@@ -281,7 +296,7 @@ class GameScene: SKScene {
         self.lastTimeInterval = currentTime
         self.itemDropCountdown -= delta
         
-        if (self.itemDropCountdown <= 0) {
+        if (self.itemDropCountdown <= 0 && isPlaying) {
             addItem()
             self.itemDropCountdown = self.itemDropInterval
         }
@@ -292,17 +307,25 @@ class GameScene: SKScene {
      */
     override func didSimulatePhysics() {
         //only check endgame when physics changes -> contacts are made
-        if(itemsMissed >= 10){
-            retryButton = Button(label: "Retry", location: CGPoint(x: self.frame.midX, y: self.frame.midY + 50))
-            retryButton?.shape.zPosition = CGFloat(ZPositions.foreground.rawValue)
+        if(self.itemsMissed >= 10){
+
+            if self.isPlaying {
+                pauseGame()
+                submitScore()
+            }
+        }
+    }
+    
+    func pauseGame() {
+        self.isPlaying = false
+        physicsWorld.speed = 0
+        for child in self.children {
+            child.isPaused = true
+            child.removeAllActions()
+        }
+        if self.retryButton?.shape.parent == nil {
             self.addChild(retryButton!.shape)
-            
-            mainMenuButton = Button(label: "Main Menu", location: CGPoint(x: self.frame.midX, y: self.frame.midY - 50))
-            mainMenuButton?.shape.zPosition = CGFloat(ZPositions.foreground.rawValue)
             self.addChild(mainMenuButton!.shape)
-            
-            submitScore()
-            self.view?.isPaused = true
         }
     }
     
