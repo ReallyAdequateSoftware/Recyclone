@@ -19,6 +19,9 @@
 		166684A825227DB100BBC221 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 166684A725227DB100BBC221 /* Assets.xcassets */; };
 		166684B325227DB100BBC221 /* RecycloneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 166684B225227DB100BBC221 /* RecycloneTests.swift */; };
 		166684BE25227DB100BBC221 /* RecycloneUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 166684BD25227DB100BBC221 /* RecycloneUITests.swift */; };
+		1695087D256DCC450035E2D5 /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1695087C256DCC450035E2D5 /* Button.swift */; };
+		1695087E256DCC450035E2D5 /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1695087C256DCC450035E2D5 /* Button.swift */; };
+		1695087F256DCC450035E2D5 /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1695087C256DCC450035E2D5 /* Button.swift */; };
 		16A34A34256DAE2200EB6645 /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16A34A33256DAE2200EB6645 /* GameKit.framework */; };
 		16E963072523D35900D05497 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 16E963032523D22000D05497 /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
@@ -57,6 +60,7 @@
 		166684B925227DB100BBC221 /* RecycloneUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RecycloneUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		166684BD25227DB100BBC221 /* RecycloneUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecycloneUITests.swift; sourceTree = "<group>"; };
 		166684BF25227DB100BBC221 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1695087C256DCC450035E2D5 /* Button.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Button.swift; sourceTree = "<group>"; };
 		16A34A33256DAE2200EB6645 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
 		16E963032523D22000D05497 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -111,6 +115,7 @@
 		1666849925227DAF00BBC221 /* Recyclone */ = {
 			isa = PBXGroup;
 			children = (
+				16950883256DCC680035E2D5 /* Models */,
 				16E963032523D22000D05497 /* LaunchScreen.storyboard */,
 				1666849A25227DAF00BBC221 /* AppDelegate.swift */,
 				1666849E25227DAF00BBC221 /* Actions.sks */,
@@ -141,6 +146,14 @@
 				166684BF25227DB100BBC221 /* Info.plist */,
 			);
 			path = RecycloneUITests;
+			sourceTree = "<group>";
+		};
+		16950883256DCC680035E2D5 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				1695087C256DCC450035E2D5 /* Button.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 		16A34A32256DAE2200EB6645 /* Frameworks */ = {
@@ -283,6 +296,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				166684A125227DAF00BBC221 /* GameScene.swift in Sources */,
+				1695087D256DCC450035E2D5 /* Button.swift in Sources */,
 				166684A325227DAF00BBC221 /* GameViewController.swift in Sources */,
 				0F7F1E53253F775D003D6DA6 /* MainMenuScene.swift in Sources */,
 				16407D2B2564CE6F000CF628 /* MultipeerWrangler.swift in Sources */,
@@ -295,6 +309,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				16407D2C2564CE6F000CF628 /* MultipeerWrangler.swift in Sources */,
+				1695087E256DCC450035E2D5 /* Button.swift in Sources */,
 				166684B325227DB100BBC221 /* RecycloneTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -304,6 +319,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				16407D2D2564CE6F000CF628 /* MultipeerWrangler.swift in Sources */,
+				1695087F256DCC450035E2D5 /* Button.swift in Sources */,
 				166684BE25227DB100BBC221 /* RecycloneUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

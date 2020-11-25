@@ -12,36 +12,6 @@ func  *(left: CGSize, right: Double) -> CGSize {
     return CGSize(width: Double(left.width) * right, height: Double(left.height) * (right * 1.5))
 }
 
-class Button {
-    var shape: SKShapeNode
-    var name: String
-
-    init(label: String, location: CGPoint) {
-        
-        let labelNode = SKLabelNode(text: label)
-        labelNode.fontColor = SKColor.lightGray
-        labelNode.horizontalAlignmentMode = .center
-        labelNode.position = location
-        labelNode.name = label
-        
-        let buttonSize = labelNode.frame.size * 1.15
-        self.shape = SKShapeNode(rect: CGRect(origin: CGPoint(x: labelNode.position.x - buttonSize.width / 2,
-                                                              y: labelNode.position.y - buttonSize.height / 2),
-                                              size: buttonSize),
-                                            cornerRadius: 10)
-        self.shape.fillColor = SKColor.darkGray
-        self.shape.strokeColor = SKColor.darkGray
-        self.shape.name = label
-        
-        labelNode.horizontalAlignmentMode = .center
-        labelNode.verticalAlignmentMode = .center
-        self.shape.addChild(labelNode)
-        
-        
-        self.name = label
-    }
-}
-
 protocol GCWrangler {
     func showLeaderboard()
 }
@@ -54,7 +24,6 @@ class MainMenuScene: SKScene {
     var sendDataButton: Button!
     var showLeaderboardButton: Button!
     var touchToNode = [UITouch: SKNode]()
-    var gameScene: GameScene?
     var buttonNames = Set<String>()
     let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
     var gcWranglerDelegate: GCWrangler?
@@ -63,7 +32,6 @@ class MainMenuScene: SKScene {
         super.init(size: size)
         
         self.backgroundColor = SKColor.systemBlue
-        gameScene = GameScene(size: size)
         
         let label = SKLabelNode(text: "Recyclone")
         label.fontSize = 40
@@ -103,7 +71,6 @@ class MainMenuScene: SKScene {
             let positionInScene = touch.location(in: self)
             let touchedNode = self.atPoint(positionInScene)
             // associate touches with the buttons they pressed
-            //TODO: use set to track button names
             if  buttonNames.contains(touchedNode.name ?? "no name") &&
                     touchedNode.contains(positionInScene) {
                 impactFeedback.impactOccurred()
@@ -127,8 +94,8 @@ class MainMenuScene: SKScene {
                     if previouslyTouched.name == "Start" {
                         let reveal = SKTransition.reveal(with: .down,
                                                          duration: 1)
-                        
-                        self.scene?.view!.presentScene(self.gameScene!, transition: reveal)
+                        let gameScene = GameScene(size: self.size)
+                        self.scene?.view!.presentScene(gameScene, transition: reveal)
                         
                     } else if previouslyTouched.name == "Start Multipeer" {
                         var wrangler = self.appDelegate.multipeerWrangler

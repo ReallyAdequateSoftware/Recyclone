@@ -38,6 +38,13 @@ enum ItemType: String {
     case compost
     case none
 }
+
+enum ZPositions: Int {
+    case background = -1
+    case item = 0
+    case foreground = 1
+}
+
 class Item: SKSpriteNode{
     var itemTexture: ItemTexture
     
@@ -114,13 +121,14 @@ class GameScene: SKScene {
     let SCREEN_HEIGHT = UIScreen.main.bounds.size.height
     var compostBin = SKSpriteNode()
     var recycleBin = SKSpriteNode()
-    var currentZ = 0
     let BOUNDARY_OUTSET = CGFloat(100)
     let FONT_SIZE = 30
     let FONT_NAME = "HelveticaNeue"
     var itemTypeToBin = [ItemType : SKNode]()
     let hapticFeedback = UINotificationFeedbackGenerator()
     let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+    var retryButton: Button?
+    var mainMenuButton: Button?
     
     //map for associating individual touches with items
     private var touchToNode = [UITouch: SKNode]()
@@ -180,6 +188,7 @@ class GameScene: SKScene {
      HANDLE TOUCH EVENTS
      */
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        impactFeedback.prepare()
         for touch in touches{
             let location = touch.location(in: self)
             let touchedNodes = self.nodes(at: location)
@@ -191,6 +200,10 @@ class GameScene: SKScene {
                     node.physicsBody?.isResting = true
                     self.touchToNode.updateValue(node, forKey: touch)
                     break
+                } else if node.name == "Retry" || node.name == "Main Menu" &&
+                            node.contains(location) {
+                    impactFeedback.impactOccurred()
+                    self.touchToNode.updateValue(node, forKey: touch)
                 }
             }
         }
@@ -203,7 +216,8 @@ class GameScene: SKScene {
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        self.hapticFeedback.prepare()
+        self.impactFeedback.prepare()
+        
         for touch in touches{
             if let node = self.touchToNode[touch] as? Item {    //only get nodes that are a trash item
                 
@@ -213,7 +227,6 @@ class GameScene: SKScene {
                     
                     impactFeedback.impactOccurred()
                     score += 1
-                    currentZ -= 1
                     if (score%10 == 0){
                         itemDropInterval *= ITEM_INTERVAL_MULTI
                         itemSpeed *= ITEM_SPEED_MULTI
@@ -223,10 +236,30 @@ class GameScene: SKScene {
                     node.physicsBody?.velocity = CGVector(dx: 0,
                                                           dy: CGFloat(-itemSpeed))
                 }
+                
+                self.touchToNode[touch]?.isPaused = false
+                self.touchToNode[touch]?.physicsBody?.isResting = false
+                touchToNode.removeValue(forKey: touch)
+            } else if let node = self.touchToNode[touch] {
+                if node.contains(touch.location(in: self)) {
+                    if node.name == "Retry" {
+                        self.view?.isPaused = false
+                        let retryScene = GameScene(size: self.size)
+                        retryScene.scaleMode = self.scaleMode
+                        let animation = SKTransition.fade(withDuration: 1.0)
+                        self.scene?.view!.presentScene(retryScene, transition: animation)
+                        
+                    } else if node.name == "Main Menu" {
+                        self.view?.isPaused = false
+                        let mainMenuScene = MainMenuScene(size: self.size)
+                        mainMenuScene.scaleMode = self.scaleMode
+                        let animation = SKTransition.fade(withDuration: 1.0)
+                        self.scene?.view!.presentScene(mainMenuScene, transition: animation)
+                    }
+                    self.impactFeedback.impactOccurred()
+                }
             }
-            self.touchToNode[touch]?.isPaused = false
-            self.touchToNode[touch]?.physicsBody?.isResting = false
-            touchToNode.removeValue(forKey: touch)
+            
         }
     }
     
@@ -256,22 +289,32 @@ class GameScene: SKScene {
     override func didSimulatePhysics() {
         //only check endgame when physics changes -> contacts are made
         if(itemsMissed >= 10){
-            if (GKLocalPlayer.local.isAuthenticated) {
-                let gkScore = GKScore(leaderboardIdentifier: "com.highscore.Recyclone")
-                gkScore.value = Int64(score)
-                GKScore.report([gkScore]) { (error) in
-                    if error != nil {
-                        print(error!.localizedDescription)
-                    } else {
-                        print("High Score submitted to your Leaderboard!")
-                    }
-                }
-            }
+            retryButton = Button(label: "Retry", location: CGPoint(x: self.frame.midX, y: self.frame.midY + 50))
+            retryButton?.shape.zPosition = CGFloat(ZPositions.foreground.rawValue)
+            self.addChild(retryButton!.shape)
+            
+            mainMenuButton = Button(label: "Main Menu", location: CGPoint(x: self.frame.midX, y: self.frame.midY - 50))
+            mainMenuButton?.shape.zPosition = CGFloat(ZPositions.foreground.rawValue)
+            self.addChild(mainMenuButton!.shape)
+            
+            submitScore()
             self.view?.isPaused = true
         }
     }
     
-    
+    func submitScore() {
+        if (GKLocalPlayer.local.isAuthenticated) {
+            let gkScore = GKScore(leaderboardIdentifier: "com.highscore.Recyclone")
+            gkScore.value = Int64(score)
+            GKScore.report([gkScore]) { (error) in
+                if error != nil {
+                    print(error!.localizedDescription)
+                } else {
+                    print("High Score submitted to the leaderboard!")
+                }
+            }
+        }
+    }
     /*
      random number generation
      */
@@ -294,12 +337,11 @@ class GameScene: SKScene {
             item.position = CGPoint(x: random(min: 0,
                                               max: SCREEN_WIDTH - item.size.width),
                                     y: SCREEN_HEIGHT + item.size.height)
-            item.zPosition = CGFloat(currentZ)
+            item.zPosition = CGFloat(ZPositions.item.rawValue)
             //set physics
             item.physicsBody?.velocity = CGVector(dx: 0,
                                                   dy: CGFloat(-itemSpeed))
             
-            currentZ += 1
             addChild(item)
             print("\(item.name ?? "nothing") added")
         }
@@ -312,14 +354,14 @@ class GameScene: SKScene {
         compostBin = SKSpriteNode(imageNamed: "compost_bin")
         compostBin.position = CGPoint(x: compostBin.size.width * 0.75,
                                       y: compostBin.size.height)
-        compostBin.zPosition = CGFloat(-1)
+        compostBin.zPosition = CGFloat(ZPositions.background.rawValue)
         itemTypeToBin.updateValue(compostBin, forKey: ItemType.compost)
         addChild(compostBin)
         
         recycleBin = SKSpriteNode(imageNamed: "recycle_bin")
         recycleBin.position = CGPoint(x: SCREEN_WIDTH - recycleBin.size.width * 0.75,
                                       y: recycleBin.size.height)
-        recycleBin.zPosition = CGFloat(-1)
+        recycleBin.zPosition = CGFloat(ZPositions.background.rawValue)
         itemTypeToBin.updateValue(recycleBin, forKey: ItemType.recycle)
         addChild(recycleBin)
     }

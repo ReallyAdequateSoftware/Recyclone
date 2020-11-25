@@ -85,24 +85,6 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate {
         }
     }
     
-    // MARK: - ADD 10 POINTS TO THE SCORE AND SUBMIT THE UPDATED SCORE TO GAME CENTER
-    @IBAction func addScoreAndSubmitToGC(_ sender: AnyObject) {
-        // Add 10 points to current score
-        score += 10
-        scoreLabel.text = "\(score)"
-     
-        // Submit score to GC leaderboard
-        let bestScoreInt = GKScore(leaderboardIdentifier: LEADERBOARD_ID)
-        bestScoreInt.value = Int64(score)
-        GKScore.report([bestScoreInt]) { (error) in
-            if error != nil {
-                print(error!.localizedDescription)
-            } else {
-                print("Best Score submitted to your Leaderboard!")
-            }
-        }
-    }
-    
     // Delegate to dismiss the GC controller
     func gameCenterViewControllerDidFinish(_ gameCenterViewController: GKGameCenterViewController) {
         gameCenterViewController.dismiss(animated: true, completion: nil)
