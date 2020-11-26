@@ -48,6 +48,29 @@ extension CGPoint {
     }
 }
 
+/*
+ handle missed items
+ */
+extension GameScene: SKPhysicsContactDelegate{
+    func didBegin(_ contact: SKPhysicsContact){
+        //remove the item if it contacted the boundary
+        if contact.bodyA.categoryBitMask == PhysicsCategory.item {
+            contact.bodyA.node?.removeFromParent()
+            self.hapticFeedback.notificationOccurred(.warning)
+            itemsMissed += 1
+            print("item removed")
+        }
+        
+        if contact.bodyB.categoryBitMask == PhysicsCategory.item {
+            contact.bodyB.node?.removeFromParent()
+            self.hapticFeedback.notificationOccurred(.warning)
+            itemsMissed += 1
+            print("item removed")
+        }
+    }
+}
+
+
 class GameScene: SKScene {
     
     var appDelegate = UIApplication.shared.delegate as! AppDelegate
@@ -86,6 +109,9 @@ class GameScene: SKScene {
     var mainMenuButton: Button?
     var isPlaying = true
     
+    let scoringLayer = SKNode()
+    let itemLayer = SKNode()
+    
     //map for associating individual touches with items
     private var touchToNode = [UITouch: SKNode]()
     
@@ -94,15 +120,7 @@ class GameScene: SKScene {
      */
     override func didMove(to view: SKView) {
         backgroundColor = SKColor.white
-        //initialize trash item textures
-        for i in 0..<NUM_OF_COMPOST_IMG{
-            trashItemTextures.insert( ItemTexture(texture: SKTexture(imageNamed: "compost/compost\(i)"),
-                                                  type: ItemType.compost))
-        }
-        for i in 0..<NUM_OF_RECYCLE_IMG{
-            trashItemTextures.insert( ItemTexture(texture: SKTexture(imageNamed: "recycle/recycle\(i)"),
-                                                  type: ItemType.recycle))
-        }
+        loadItemTextures()
         
         //setup boundary removal physics for performance and game over mechanism
         physicsWorld.gravity = CGVector(dx: 0, dy: 0)
@@ -115,32 +133,16 @@ class GameScene: SKScene {
                                         y: -BOUNDARY_OUTSET))
         physicsBody?.categoryBitMask = PhysicsCategory.boundary
         
-        //setup scoring
-        scoreNode.position = CGPoint(x: SCREEN_WIDTH * 0.25,
-                                     y: SCREEN_HEIGHT - BOUNDARY_OUTSET)
-        scoreNode.zPosition = CGFloat(ZPositions.background.rawValue)
-        scoreNode.text = "\(score)"
-        scoreNode.fontColor = UIColor.green
-        scoreNode.fontSize = CGFloat(FONT_SIZE)
-        scoreNode.fontName = FONT_NAME
-        addChild(scoreNode)
-        
-        itemsMissedNode.text = "\(itemsMissed)"
-        itemsMissedNode.position = CGPoint(x: SCREEN_WIDTH * 0.75,
-                                           y: SCREEN_HEIGHT - BOUNDARY_OUTSET)
-        itemsMissedNode.zPosition = CGFloat(ZPositions.background.rawValue)
-        itemsMissedNode.fontColor = UIColor.red
-        itemsMissedNode.fontSize = CGFloat(FONT_SIZE)
-        itemsMissedNode.fontName = FONT_NAME
-        addChild(itemsMissedNode)
-        
+        //initialize "game over" buttons
         retryButton = Button(label: "Retry", location: CGPoint(x: self.frame.midX, y: self.frame.midY + 50))
         retryButton?.shape.zPosition = CGFloat(ZPositions.foreground.rawValue)
         mainMenuButton = Button(label: "Main Menu", location: CGPoint(x: self.frame.midX, y: self.frame.midY - 50))
         mainMenuButton?.shape.zPosition = CGFloat(ZPositions.foreground.rawValue)
         
-        //add scoring bins
-        addBins()
+        initScoring()
+        
+        self.addChild(scoringLayer)
+        self.addChild(itemLayer)
         
     }
     
@@ -274,7 +276,7 @@ class GameScene: SKScene {
     func pauseGame() {
         self.isPlaying = false
         physicsWorld.speed = 0
-        for child in self.children {
+        for child in itemLayer.children {
             child.isPaused = true
             child.removeAllActions()
         }
@@ -324,50 +326,61 @@ class GameScene: SKScene {
             item.physicsBody?.velocity = CGVector(dx: 0,
                                                   dy: CGFloat(-itemSpeed))
             
-            addChild(item)
+            itemLayer.addChild(item)
             print("\(item.name ?? "nothing") added")
         }
     }
     
     /*
-     add scoring bins
+     create everything we need to score the game
      */
-    func addBins(){
+    func initScoring() {
+        
+        //setup scoring
+        scoreNode.position = CGPoint(x: SCREEN_WIDTH * 0.25,
+                                     y: SCREEN_HEIGHT - BOUNDARY_OUTSET)
+        scoreNode.zPosition = CGFloat(ZPositions.background.rawValue)
+        scoreNode.text = "\(score)"
+        scoreNode.fontColor = UIColor.green
+        scoreNode.fontSize = CGFloat(FONT_SIZE)
+        scoreNode.fontName = FONT_NAME
+        scoringLayer.addChild(scoreNode)
+        
+        itemsMissedNode.text = "\(itemsMissed)"
+        itemsMissedNode.position = CGPoint(x: SCREEN_WIDTH * 0.75,
+                                           y: SCREEN_HEIGHT - BOUNDARY_OUTSET)
+        itemsMissedNode.zPosition = CGFloat(ZPositions.background.rawValue)
+        itemsMissedNode.fontColor = UIColor.red
+        itemsMissedNode.fontSize = CGFloat(FONT_SIZE)
+        itemsMissedNode.fontName = FONT_NAME
+        scoringLayer.addChild(itemsMissedNode)
+        
+        //setup scoring bins
         compostBin = SKSpriteNode(imageNamed: "compost_bin")
         compostBin.position = CGPoint(x: compostBin.size.width * 0.75,
                                       y: compostBin.size.height)
         compostBin.zPosition = CGFloat(ZPositions.background.rawValue)
         itemTypeToBin.updateValue(compostBin, forKey: ItemType.compost)
-        addChild(compostBin)
+        scoringLayer.addChild(compostBin)
         
         recycleBin = SKSpriteNode(imageNamed: "recycle_bin")
         recycleBin.position = CGPoint(x: SCREEN_WIDTH - recycleBin.size.width * 0.75,
                                       y: recycleBin.size.height)
         recycleBin.zPosition = CGFloat(ZPositions.background.rawValue)
         itemTypeToBin.updateValue(recycleBin, forKey: ItemType.recycle)
-        addChild(recycleBin)
+        scoringLayer.addChild(recycleBin)
     }
     
-}
-
-/*
- handle missed items
- */
-extension GameScene: SKPhysicsContactDelegate{
-    func didBegin(_ contact: SKPhysicsContact){
-        //remove the item if it contacted the boundary
-        if contact.bodyA.categoryBitMask == PhysicsCategory.item {
-            contact.bodyA.node?.removeFromParent()
-            self.hapticFeedback.notificationOccurred(.warning)
-            itemsMissed += 1
-            print("item removed")
+    func loadItemTextures() {
+        //initialize trash item textures
+        for i in 0..<NUM_OF_COMPOST_IMG{
+            trashItemTextures.insert( ItemTexture(texture: SKTexture(imageNamed: "compost/compost\(i)"),
+                                                  type: ItemType.compost))
         }
-        
-        if contact.bodyB.categoryBitMask == PhysicsCategory.item {
-            contact.bodyB.node?.removeFromParent()
-            self.hapticFeedback.notificationOccurred(.warning)
-            itemsMissed += 1
-            print("item removed")
+        for i in 0..<NUM_OF_RECYCLE_IMG{
+            trashItemTextures.insert( ItemTexture(texture: SKTexture(imageNamed: "recycle/recycle\(i)"),
+                                                  type: ItemType.recycle))
         }
     }
+    
 }
