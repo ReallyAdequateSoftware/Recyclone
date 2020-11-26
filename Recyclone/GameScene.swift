@@ -251,9 +251,7 @@ class GameScene: SKScene {
                 if node.contains(touch.location(in: self)) {
                     if node.name == "Retry" || node.name == "Main Menu" {
                         let nextScene = node.name == "Retry" ? GameScene(size: self.size): MainMenuScene(size: self.size)
-                        self.view?.isPaused = false
                         nextScene.scaleMode = self.scaleMode
-                        // TODO: find out why this transition doesnt work
                         let animation = SKTransition.crossFade(withDuration: TimeInterval(1.0))
                         cleanUp()
                         self.view?.presentScene(nextScene, transition: animation)
@@ -307,12 +305,9 @@ class GameScene: SKScene {
      */
     override func didSimulatePhysics() {
         //only check endgame when physics changes -> contacts are made
-        if(self.itemsMissed >= 10){
-
-            if self.isPlaying {
-                pauseGame()
-                submitScore()
-            }
+        if(self.itemsMissed >= 10 && self.isPlaying){
+            pauseGame()
+            submitScore()
         }
     }
     
