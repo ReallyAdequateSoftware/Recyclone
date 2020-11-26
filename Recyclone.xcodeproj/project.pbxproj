@@ -11,6 +11,10 @@
 		16407D2B2564CE6F000CF628 /* MultipeerWrangler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16407D2A2564CE6F000CF628 /* MultipeerWrangler.swift */; };
 		16407D2C2564CE6F000CF628 /* MultipeerWrangler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16407D2A2564CE6F000CF628 /* MultipeerWrangler.swift */; };
 		16407D2D2564CE6F000CF628 /* MultipeerWrangler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16407D2A2564CE6F000CF628 /* MultipeerWrangler.swift */; };
+		164E16E0256F25250030E3F1 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 164E16DF256F25250030E3F1 /* Item.swift */; };
+		164E16E4256F25370030E3F1 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 164E16DF256F25250030E3F1 /* Item.swift */; };
+		164E16E5256F25370030E3F1 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 164E16DF256F25250030E3F1 /* Item.swift */; };
+		164E16F0256F26910030E3F1 /* PhysicsCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 164E16EF256F26910030E3F1 /* PhysicsCategory.swift */; };
 		1666849B25227DAF00BBC221 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1666849A25227DAF00BBC221 /* AppDelegate.swift */; };
 		1666849F25227DAF00BBC221 /* Actions.sks in Resources */ = {isa = PBXBuildFile; fileRef = 1666849E25227DAF00BBC221 /* Actions.sks */; };
 		166684A125227DAF00BBC221 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 166684A025227DAF00BBC221 /* GameScene.swift */; };
@@ -46,6 +50,8 @@
 /* Begin PBXFileReference section */
 		0F7F1E52253F775D003D6DA6 /* MainMenuScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuScene.swift; sourceTree = "<group>"; };
 		16407D2A2564CE6F000CF628 /* MultipeerWrangler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipeerWrangler.swift; sourceTree = "<group>"; };
+		164E16DF256F25250030E3F1 /* Item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Item.swift; sourceTree = "<group>"; };
+		164E16EF256F26910030E3F1 /* PhysicsCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhysicsCategory.swift; sourceTree = "<group>"; };
 		1666849725227DAF00BBC221 /* Recyclone.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Recyclone.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1666849A25227DAF00BBC221 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1666849E25227DAF00BBC221 /* Actions.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Actions.sks; sourceTree = "<group>"; };
@@ -152,6 +158,8 @@
 			isa = PBXGroup;
 			children = (
 				1695087C256DCC450035E2D5 /* Button.swift */,
+				164E16DF256F25250030E3F1 /* Item.swift */,
+				164E16EF256F26910030E3F1 /* PhysicsCategory.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -296,9 +304,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				166684A125227DAF00BBC221 /* GameScene.swift in Sources */,
+				164E16F0256F26910030E3F1 /* PhysicsCategory.swift in Sources */,
 				1695087D256DCC450035E2D5 /* Button.swift in Sources */,
 				166684A325227DAF00BBC221 /* GameViewController.swift in Sources */,
 				0F7F1E53253F775D003D6DA6 /* MainMenuScene.swift in Sources */,
+				164E16E0256F25250030E3F1 /* Item.swift in Sources */,
 				16407D2B2564CE6F000CF628 /* MultipeerWrangler.swift in Sources */,
 				1666849B25227DAF00BBC221 /* AppDelegate.swift in Sources */,
 			);
@@ -308,6 +318,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				164E16E5256F25370030E3F1 /* Item.swift in Sources */,
 				16407D2C2564CE6F000CF628 /* MultipeerWrangler.swift in Sources */,
 				1695087E256DCC450035E2D5 /* Button.swift in Sources */,
 				166684B325227DB100BBC221 /* RecycloneTests.swift in Sources */,
@@ -318,6 +329,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				164E16E4256F25370030E3F1 /* Item.swift in Sources */,
 				16407D2D2564CE6F000CF628 /* MultipeerWrangler.swift in Sources */,
 				1695087F256DCC450035E2D5 /* Button.swift in Sources */,
 				166684BE25227DB100BBC221 /* RecycloneUITests.swift in Sources */,

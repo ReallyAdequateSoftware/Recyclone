@@ -32,55 +32,10 @@ func sqrt(a: CGFloat) -> CGFloat {
 }
 #endif
 
-enum ItemType: String {
-    case recycle
-    case trash
-    case compost
-    case none
-}
-
 enum ZPositions: Int {
     case background = -1
     case item = 0
     case foreground = 1
-}
-
-class Item: SKSpriteNode{
-    var itemTexture: ItemTexture
-    
-    override init(texture: SKTexture?, color: UIColor, size: CGSize) {
-        self.itemTexture = ItemTexture(texture: SKTexture(imageNamed: "not_found"), type: ItemType.none)
-        super.init(texture: texture, color: color, size: size)
-        self.physicsBody = SKPhysicsBody(circleOfRadius: self.size.width/2)
-        self.physicsBody?.affectedByGravity = true
-        self.physicsBody?.categoryBitMask = PhysicsCategory.item
-        self.physicsBody?.contactTestBitMask = PhysicsCategory.boundary
-        self.physicsBody?.collisionBitMask = PhysicsCategory.none
-        self.physicsBody?.isDynamic = true
-        self.physicsBody?.linearDamping = 0
-    }
-    
-    convenience init(itemTexture: ItemTexture) {
-        self.init(texture: itemTexture.texture, color: UIColor.white, size: itemTexture.texture.size())
-        self.itemTexture = itemTexture
-    }
-    required init(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-}
-
-struct ItemTexture: Hashable{
-    let texture: SKTexture
-    let type: ItemType
-}
-
-
-struct PhysicsCategory {
-    static let none      : UInt32 = 0
-    static let all       : UInt32 = UInt32.max
-    static let boundary  : UInt32 = 0b1
-    static let item      : UInt32 = 0b10
-    
 }
 
 extension CGPoint {
