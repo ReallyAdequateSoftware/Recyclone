@@ -158,15 +158,15 @@ class GameScene: SKScene {
             let location = touch.location(in: self)
             let touchedNodes = self.nodes(at: location)
             for node in touchedNodes {
-                if node.parent == itemLayer {    //only allow user to drag trash items
-                    node.isPaused = true
-                    node.physicsBody?.isResting = true
-                    self.touchToNode.updateValue(node, forKey: touch)
-                    break
-                } else if node.name == "Retry" || node.name == "Main Menu" {
-                    impactFeedback.impactOccurred()
-                    self.touchToNode.updateValue(node, forKey: touch)
-                    print(self.touchToNode)
+                if self.touchToNode[touch] == nil { //only allow for a touch to select a single node
+                    if node.parent == itemLayer {
+                        node.isPaused = true
+                        node.physicsBody?.isResting = true
+                        self.touchToNode.updateValue(node, forKey: touch)
+                    } else if node.parent == buttonLayer {
+                        impactFeedback.impactOccurred()
+                        self.touchToNode.updateValue(node, forKey: touch)
+                    }
                 }
             }
         }
@@ -184,16 +184,13 @@ class GameScene: SKScene {
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         self.impactFeedback.prepare()
-        
         for touch in touches {
             
             let touchedNodes = self.nodes(at: touch.location(in: self))
-            for touchedNode in touchedNodes {
-                
+            for touchedNode in touchedNodes.reversed() {
                 if let previouslyTouched = self.touchToNode[touch],
                    previouslyTouched == touchedNode { //only process touches that started and ended on the same node
                     if previouslyTouched.parent == itemLayer { //handle trash items
-                        print("as item")
                         let texture = (previouslyTouched as! Item).itemTexture
                         if  itemTypeToBin[texture.type] != nil &&
                                 itemTypeToBin[texture.type]!.frame.contains(previouslyTouched.position) { //check if the item was placed in the right bin
@@ -213,14 +210,14 @@ class GameScene: SKScene {
                         self.touchToNode[touch]?.physicsBody?.isResting = false
                         touchToNode.removeValue(forKey: touch)
                         
-                    }  else if previouslyTouched.name == "Retry" || previouslyTouched.name == "Main Menu" {
+                    }  else if previouslyTouched.parent == buttonLayer {
                         let nextScene = previouslyTouched.name == "Retry" ? GameScene(size: self.size): MainMenuScene(size: self.size)
                         nextScene.scaleMode = self.scaleMode
                         let animation = SKTransition.crossFade(withDuration: TimeInterval(1.0))
                         cleanUp()
+                        self.impactFeedback.impactOccurred()
                         self.view?.presentScene(nextScene, transition: animation)
                         
-                        self.impactFeedback.impactOccurred()
                         touchToNode.removeValue(forKey: touch)
                     }
                 }
