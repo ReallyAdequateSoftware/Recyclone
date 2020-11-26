@@ -340,7 +340,7 @@ class GameScene: SKScene {
         //setup scoring
         scoreNode.position = CGPoint(x: SCREEN_WIDTH * 0.25,
                                      y: SCREEN_HEIGHT - BOUNDARY_OUTSET)
-        scoreNode.zPosition = CGFloat(ZPositions.background.rawValue)
+        scoreNode.zPosition = CGFloat(ZPositions.foreground.rawValue)
         scoreNode.text = "\(score)"
         scoreNode.fontColor = UIColor.green
         scoreNode.fontSize = CGFloat(FONT_SIZE)
@@ -350,7 +350,7 @@ class GameScene: SKScene {
         itemsMissedNode.text = "\(itemsMissed)"
         itemsMissedNode.position = CGPoint(x: SCREEN_WIDTH * 0.75,
                                            y: SCREEN_HEIGHT - BOUNDARY_OUTSET)
-        itemsMissedNode.zPosition = CGFloat(ZPositions.background.rawValue)
+        itemsMissedNode.zPosition = CGFloat(ZPositions.foreground.rawValue)
         itemsMissedNode.fontColor = UIColor.red
         itemsMissedNode.fontSize = CGFloat(FONT_SIZE)
         itemsMissedNode.fontName = FONT_NAME
