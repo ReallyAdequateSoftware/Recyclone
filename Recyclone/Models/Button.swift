@@ -8,32 +8,81 @@
 import Foundation
 import SpriteKit
 
-class Button {
-    var shape: SKShapeNode
-    var name: String
-
-    init(label: String, location: CGPoint) {
+class Button: SKShapeNode {
+    private var label: SKLabelNode
+    private var unpressed: SKShapeNode
+    private var pressed: SKShapeNode
+    private var impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+    private var action: (() -> Void)?
+    
+    convenience init(label: String, location: CGPoint, unpressedColor: UIColor = SKColor.lightGray, pressedColor: UIColor = SKColor.darkGray, textColor: UIColor = SKColor.black, function: (() -> Void)? = nil) {
         
+        //MARK init node for the label
         let labelNode = SKLabelNode(text: label)
-        labelNode.fontColor = SKColor.lightGray
-        labelNode.horizontalAlignmentMode = .center
-        labelNode.position = location
+        labelNode.fontColor = SKColor.black
         labelNode.name = label
-        
-        let buttonSize = labelNode.frame.size * 1.15
-        self.shape = SKShapeNode(rect: CGRect(origin: CGPoint(x: labelNode.position.x - buttonSize.width / 2,
-                                                              y: labelNode.position.y - buttonSize.height / 2),
-                                              size: buttonSize),
-                                            cornerRadius: 10)
-        self.shape.fillColor = SKColor.darkGray
-        self.shape.strokeColor = SKColor.darkGray
-        self.shape.name = label
-        
         labelNode.horizontalAlignmentMode = .center
         labelNode.verticalAlignmentMode = .center
-        self.shape.addChild(labelNode)
         
+        //MARK init constants for the button rectangle
+        let buttonSize = labelNode.frame.size * 1.15
+        let buttonRect = CGRect(origin: CGPoint(x: -buttonSize.width / 2,
+                                                y: -buttonSize.height / 2),
+                                size: buttonSize)
         
+        self.init(rect: CGRect(origin: CGPoint(x: -buttonSize.width / 2,
+                                                y: -buttonSize.height / 2),
+                                size: buttonSize))
+        
+        self.position = location
         self.name = label
+        self.isUserInteractionEnabled = true
+        self.lineWidth = 0
+        self.action = function
+        self.label = labelNode
+
+        self.pressed = SKShapeNode(rect: buttonRect,
+                                   cornerRadius: 10)
+        self.pressed.fillColor = pressedColor
+        self.pressed.strokeColor = pressedColor
+        self.pressed.name = label
+        self.pressed.isHidden = true
+        
+        self.unpressed = SKShapeNode(rect: buttonRect,
+                                     cornerRadius: 10)
+        self.unpressed.fillColor = unpressedColor
+        self.unpressed.strokeColor = unpressedColor
+        self.unpressed.name = label
+        
+        addChild(self.label)
+        addChild(self.unpressed)
+        addChild(self.pressed)
+    }
+    
+    override init() {
+        self.pressed = SKShapeNode()
+        self.unpressed = SKShapeNode()
+        self.label = SKLabelNode()
+        self.action = nil
+        super.init()
+    }
+    
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        impactFeedback.impactOccurred()
+        self.pressed.isHidden = false
+    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        impactFeedback.impactOccurred()
+        if self.action != nil{
+            self.action!()
+        }
+        
+        self.pressed.isHidden = true
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }
