@@ -216,9 +216,9 @@ class GameScene: SKScene {
                    previouslyTouched == touchedNode { //only process touches that started and ended on the same node
                     if previouslyTouched.parent == itemLayer { //handle trash items
                         let texture = (previouslyTouched as! Item).itemTexture
-                        if  itemTypeToBin[texture.type] != nil &&
-                                itemTypeToBin[texture.type]!.frame.contains(previouslyTouched.position) { //check if the item was placed in the right bin
-                            
+                        let binNode = itemTypeToBin[texture.type]!
+
+                        if  binNode.intersects(previouslyTouched) { //check if the item was placed in the right bin
                             impactFeedback.impactOccurred()
                             score += 1
                             if (score%10 == 0){
@@ -281,10 +281,10 @@ class GameScene: SKScene {
      */
     override func didSimulatePhysics() {
         //only check endgame when physics changes -> contacts are made
-//        if(self.itemsMissed >= 10 && self.isPlaying){
-//            pauseGame()
-//            submitScore()
-//        }
+        if(self.itemsMissed >= 10 && self.isPlaying){
+            pauseGame()
+            submitScore()
+        }
     }
     
     func pauseGame() {
