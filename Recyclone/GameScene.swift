@@ -107,6 +107,7 @@ class GameScene: SKScene {
     let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
     var retryButton: Button?
     var mainMenuButton: Button?
+    var buttonNameToFunction = [(String, () -> Void)]()
     var isPlaying = true
     
     let scoringLayer = SKNode()
@@ -135,18 +136,42 @@ class GameScene: SKScene {
         physicsBody?.categoryBitMask = PhysicsCategory.boundary
         
         //initialize "game over" buttons
-        retryButton = Button(label: "Retry", location: CGPoint(x: self.frame.midX, y: self.frame.midY + 50))
-        retryButton?.shape.zPosition = CGFloat(ZPositions.foreground.rawValue)
-        mainMenuButton = Button(label: "Main Menu", location: CGPoint(x: self.frame.midX, y: self.frame.midY - 50))
-        mainMenuButton?.shape.zPosition = CGFloat(ZPositions.foreground.rawValue)
-        buttonLayer.addChild(retryButton!.shape)
-        buttonLayer.addChild(mainMenuButton!.shape)
+        
+        buttonNameToFunction = [("Retry", retryGame),
+                                ("Main Menu", goToMainMenu),
+        ]
+        
+        for (index, (name, function)) in buttonNameToFunction.enumerated() {
+            let button = Button(label: name,
+                                location: CGPoint(x: self.frame.midX,
+                                                  y: self.frame.midY + 50 - CGFloat((index * 100))),
+                                function: function)
+            button.zPosition = CGFloat(ZPositions.foreground.rawValue)
+            buttonLayer.addChild(button)
+        }
         
         initScoring()
         
         self.addChild(scoringLayer)
         self.addChild(itemLayer)
         
+    }
+    
+    // TODO: maybe these should be combined into single function that decides next scene based off the buttons name
+    func retryGame() -> Void {
+        let nextScene = GameScene(size: self.size)
+        nextScene.scaleMode = self.scaleMode
+        let animation = SKTransition.crossFade(withDuration: TimeInterval(1.0))
+        cleanUp()
+        self.view?.presentScene(nextScene, transition: animation)
+    }
+    
+    func goToMainMenu() -> Void {
+        let nextScene = MainMenuScene(size: self.size)
+        nextScene.scaleMode = self.scaleMode
+        let animation = SKTransition.crossFade(withDuration: TimeInterval(1.0))
+        cleanUp()
+        self.view?.presentScene(nextScene, transition: animation)
     }
     
     /*
@@ -163,9 +188,6 @@ class GameScene: SKScene {
                         node.isPaused = true
                         node.physicsBody?.isResting = true
                         self.touchToNode.updateValue(node, forKey: touch)
-                    } else if node.parent == buttonLayer {
-                        impactFeedback.impactOccurred()
-                        self.touchToNode.updateValue(node, forKey: touch)
                     }
                 }
             }
@@ -174,9 +196,11 @@ class GameScene: SKScene {
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches{
-            if touchToNode[touch] is Item &&
+            if let itemNode = touchToNode[touch],
+               itemNode is Item &&
                 self.isPlaying { //only update touch map when the item touched is an item and we're still playing
-                touchToNode[touch]?.position = touch.location(in: self)
+                itemNode.isPaused = true
+                itemNode.position = touch.location(in: self)
             }
             
         }
@@ -210,15 +234,6 @@ class GameScene: SKScene {
                         self.touchToNode[touch]?.physicsBody?.isResting = false
                         touchToNode.removeValue(forKey: touch)
                         
-                    }  else if previouslyTouched.parent == buttonLayer {
-                        let nextScene = previouslyTouched.name == "Retry" ? GameScene(size: self.size): MainMenuScene(size: self.size)
-                        nextScene.scaleMode = self.scaleMode
-                        let animation = SKTransition.crossFade(withDuration: TimeInterval(1.0))
-                        cleanUp()
-                        self.impactFeedback.impactOccurred()
-                        self.view?.presentScene(nextScene, transition: animation)
-                        
-                        touchToNode.removeValue(forKey: touch)
                     }
                 }
             }
@@ -266,10 +281,10 @@ class GameScene: SKScene {
      */
     override func didSimulatePhysics() {
         //only check endgame when physics changes -> contacts are made
-        if(self.itemsMissed >= 10 && self.isPlaying){
-            pauseGame()
-            submitScore()
-        }
+//        if(self.itemsMissed >= 10 && self.isPlaying){
+//            pauseGame()
+//            submitScore()
+//        }
     }
     
     func pauseGame() {
