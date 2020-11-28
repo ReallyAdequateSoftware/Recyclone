@@ -76,10 +76,10 @@ class GameScene: SKScene {
     var appDelegate = UIApplication.shared.delegate as! AppDelegate
     var trashItemTextures = Set<ItemTexture>()
     var itemSpeed = Float(200)
-    let ITEM_SPEED_MULTI = Float(1.15);
+    let ITEM_SPEED_MULTI = Float(1.1);
     var itemDropCountdown = TimeInterval(1)
     var itemDropInterval = TimeInterval(1)
-    let ITEM_INTERVAL_MULTI = Double(0.7)
+    let ITEM_INTERVAL_MULTI = Double(0.85)
     var lastTimeInterval = TimeInterval(0)
     var itemsMissed = 0 {
         didSet{
@@ -221,10 +221,7 @@ class GameScene: SKScene {
                         if  binNode.intersects(previouslyTouched) { //check if the item was placed in the right bin
                             impactFeedback.impactOccurred()
                             score += 1
-                            if (score%10 == 0){
-                                itemDropInterval *= ITEM_INTERVAL_MULTI
-                                itemSpeed *= ITEM_SPEED_MULTI
-                            }
+                            evaluateDifficulty()
                             previouslyTouched.removeFromParent()
                         } else {    //reset the movement of the node if it wasn't removed
                             previouslyTouched.physicsBody?.velocity = CGVector(dx: 0,
@@ -321,6 +318,14 @@ class GameScene: SKScene {
     
     func random(min: CGFloat, max:CGFloat) -> CGFloat{
         return random() * (max-min) + min
+    }
+
+    
+    func evaluateDifficulty() {
+        if score % 10 == 0 {
+            itemDropInterval *= ITEM_INTERVAL_MULTI
+            itemSpeed *= ITEM_SPEED_MULTI
+        }
     }
     
     /*
