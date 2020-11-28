@@ -73,6 +73,7 @@ extension GameScene: SKPhysicsContactDelegate{
 
 class GameScene: SKScene {
     
+    var gcWranglerDelegate: GCWrangler?
     var appDelegate = UIApplication.shared.delegate as! AppDelegate
     var trashItemTextures = Set<ItemTexture>()
     var itemSpeed = Float(200)
@@ -107,7 +108,7 @@ class GameScene: SKScene {
     let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
     var retryButton: Button?
     var mainMenuButton: Button?
-    var buttonNameToFunction = [(String, () -> Void)]()
+    //var buttonNameToFunction = [(String, () -> Void)]()
     var isPlaying = true
     
     let scoringLayer = SKNode()
@@ -137,7 +138,7 @@ class GameScene: SKScene {
         
         //initialize "game over" buttons
         
-        buttonNameToFunction = [("Retry", retryGame),
+        var buttonNameToFunction = [("Retry", retryGame),
                                 ("Main Menu", goToMainMenu),
         ]
         
@@ -160,6 +161,7 @@ class GameScene: SKScene {
     // TODO: maybe these should be combined into single function that decides next scene based off the buttons name
     func retryGame() -> Void {
         let nextScene = GameScene(size: self.size)
+        nextScene.gcWranglerDelegate = self.gcWranglerDelegate
         nextScene.scaleMode = self.scaleMode
         let animation = SKTransition.crossFade(withDuration: TimeInterval(1.0))
         cleanUp()
@@ -168,6 +170,8 @@ class GameScene: SKScene {
     
     func goToMainMenu() -> Void {
         let nextScene = MainMenuScene(size: self.size)
+        // TODO: seems like bad practice to manually set delegate rather than in an init somewhere
+        nextScene.gcWranglerDelegate = self.gcWranglerDelegate
         nextScene.scaleMode = self.scaleMode
         let animation = SKTransition.crossFade(withDuration: TimeInterval(1.0))
         cleanUp()
@@ -245,7 +249,7 @@ class GameScene: SKScene {
     }
     
     deinit {
-        print("denitialized")
+        print("game scene denitialized")
     }
     
     func cleanUp() {
