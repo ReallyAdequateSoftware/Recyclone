@@ -23,7 +23,6 @@ class MainMenuScene: SKScene {
     var multiPeerButton: Button!
     var sendDataButton: Button!
     var showLeaderboardButton: Button!
-    var buttonNameToFunction = [(String, () -> Void)]()
     var gcWranglerDelegate: GCWrangler?
         
     override init(size: CGSize) {
@@ -37,7 +36,7 @@ class MainMenuScene: SKScene {
         label.position = CGPoint(x: self.frame.midX, y: self.frame.midY + 200)
         addChild(label)
         
-        buttonNameToFunction = [("Start", startGame),
+        let buttonNameToFunction = [("Start", startGame),
                                     ("Start Multipeer", startMultipeer),
                                     ("Send Data", sendData),
                                     ("Leaderboard", openLeaderboard)
@@ -56,17 +55,19 @@ class MainMenuScene: SKScene {
     func startGame() -> Void {
         let reveal = SKTransition.crossFade(withDuration: TimeInterval(1.0))
         let gameScene = GameScene(size: self.size)
+        gameScene.gcWranglerDelegate = self.gcWranglerDelegate
+        cleanUp()
         self.scene?.view!.presentScene(gameScene, transition: reveal)
     }
     
     func startMultipeer() -> Void {
-        var wrangler = self.appDelegate.multipeerWrangler
+        let wrangler = self.appDelegate.multipeerWrangler
         wrangler?.startHosting()
         wrangler?.joinSession()
     }
     
     func sendData() -> Void{
-        var wrangler = self.appDelegate.multipeerWrangler
+        let wrangler = self.appDelegate.multipeerWrangler
         if let d = "test data".data(using: .utf8) {
             do {
                 print("sending data to \(wrangler?.mcSession!.connectedPeers)")
@@ -84,6 +85,20 @@ class MainMenuScene: SKScene {
     
     func openLeaderboard() {
         self.gcWranglerDelegate?.showLeaderboard()
+    }
+    
+    deinit {
+        print("main menu deinitialized")
+    }
+    
+    func cleanUp() {
+        for child in self.children {
+            print("clearing \(child)")
+            child.removeAllActions()
+            child.removeAllChildren()
+            child.removeFromParent()
+        }
+        self.gcWranglerDelegate = nil
     }
     
     required init(coder aDecoder: NSCoder) {
