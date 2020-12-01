@@ -27,7 +27,7 @@ class Item: SKSpriteNode{
     override init(texture: SKTexture?, color: UIColor, size: CGSize) {
         self.itemTexture = ItemTexture(texture: SKTexture(imageNamed: "not_found"), type: ItemType.none)
         super.init(texture: texture, color: color, size: size)
-        self.physicsBody = SKPhysicsBody(circleOfRadius: self.size.width/2)
+        self.physicsBody = SKPhysicsBody(circleOfRadius:  max(self.size.height/2, self.size.width/2))
         self.physicsBody?.affectedByGravity = true
         self.physicsBody?.categoryBitMask = PhysicsCategory.item
         self.physicsBody?.contactTestBitMask = PhysicsCategory.boundary
