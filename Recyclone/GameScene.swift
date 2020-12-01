@@ -188,10 +188,11 @@ class GameScene: SKScene {
             let touchedNodes = self.nodes(at: location)
             for node in touchedNodes {
                 if self.touchToNode[touch] == nil { //only allow for a touch to select a single node
-                    if node.parent == itemLayer {
+                    if node.inParentHierarchy(itemLayer){
                         node.isPaused = true
                         node.physicsBody?.isResting = true
-                        self.touchToNode.updateValue(node, forKey: touch)
+                        //the map should only store Item nodes, not the extra node added for a larger touch area
+                        self.touchToNode.updateValue(((node is Item ? node: node.parent)!), forKey: touch)
                     }
                 }
             }
@@ -201,7 +202,6 @@ class GameScene: SKScene {
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches{
             if let itemNode = touchToNode[touch],
-               itemNode is Item &&
                 self.isPlaying { //only update touch map when the item touched is an item and we're still playing
                 itemNode.isPaused = true
                 itemNode.position = touch.location(in: self)
@@ -340,13 +340,20 @@ class GameScene: SKScene {
         if let randomItemTexture = trashItemTextures.randomElement(){
             let item = Item(itemTexture: randomItemTexture)
             item.name = randomItemTexture.type.rawValue
-            item.position = CGPoint(x: random(min: 0 + item.size.width,
+            item.position = CGPoint(x: random(min: item.size.width,
                                               max: SCREEN_WIDTH - item.size.width),
                                     y: SCREEN_HEIGHT + item.size.height)
             item.zPosition = CGFloat(ZPositions.item.rawValue)
             //set physics
             item.physicsBody?.velocity = CGVector(dx: 0,
                                                   dy: CGFloat(-itemSpeed))
+            
+            if item.size.height * item.size.width < 7000 {
+                let largestDimension = max(item.size.height, item.size.width)
+                let touchArea = SKShapeNode(circleOfRadius: largestDimension / 2)
+                //touchArea.fillColor = UIColor.black
+                item.addChild(touchArea)
+            }
             
             itemLayer.addChild(item)
             print("\(item.name ?? "nothing") added")
