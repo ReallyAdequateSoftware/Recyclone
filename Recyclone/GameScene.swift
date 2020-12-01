@@ -340,7 +340,7 @@ class GameScene: SKScene {
         if let randomItemTexture = trashItemTextures.randomElement(){
             let item = Item(itemTexture: randomItemTexture)
             item.name = randomItemTexture.type.rawValue
-            item.position = CGPoint(x: random(min: 0,
+            item.position = CGPoint(x: random(min: 0 + item.size.width,
                                               max: SCREEN_WIDTH - item.size.width),
                                     y: SCREEN_HEIGHT + item.size.height)
             item.zPosition = CGFloat(ZPositions.item.rawValue)
