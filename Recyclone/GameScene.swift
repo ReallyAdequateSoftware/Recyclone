@@ -351,7 +351,7 @@ class GameScene: SKScene {
             if item.size.height * item.size.width < 7000 {
                 let largestDimension = max(item.size.height, item.size.width)
                 let touchArea = SKShapeNode(circleOfRadius: largestDimension / 2)
-                //touchArea.fillColor = UIColor.black
+                touchArea.alpha = 0.0
                 item.addChild(touchArea)
             }
             
