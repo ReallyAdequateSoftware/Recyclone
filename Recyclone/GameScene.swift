@@ -32,9 +32,10 @@ func sqrt(a: CGFloat) -> CGFloat {
 }
 #endif
 
-enum ZPositions: Int {
+enum ZPositions: CGFloat {
     case background = -1
     case item = 0
+    case behindForeground = 0.5
     case foreground = 1
 }
 
@@ -135,22 +136,7 @@ class GameScene: SKScene {
                                         x: SCREEN_WIDTH + BOUNDARY_OUTSET,
                                         y: -BOUNDARY_OUTSET))
         physicsBody?.categoryBitMask = PhysicsCategory.boundary
-        
-        //initialize "game over" buttons
-        
-        var buttonNameToFunction = [("Retry", retryGame),
-                                ("Main Menu", goToMainMenu),
-        ]
-        
-        for (index, (name, function)) in buttonNameToFunction.enumerated() {
-            let button = Button(label: name,
-                                location: CGPoint(x: self.frame.midX,
-                                                  y: self.frame.midY + 50 - CGFloat((index * 100))),
-                                function: function)
-            button.zPosition = CGFloat(ZPositions.foreground.rawValue)
-            buttonLayer.addChild(button)
-        }
-        
+        initMenuButtons()
         initScoring()
         
         self.addChild(scoringLayer)
@@ -283,22 +269,34 @@ class GameScene: SKScene {
     override func didSimulatePhysics() {
         //only check endgame when physics changes -> contacts are made
         if(self.itemsMissed >= 10 && self.isPlaying){
-            pauseGame()
+            pauseUnpauseGame()
             submitScore()
         }
     }
     
-    func pauseGame() {
-        self.isPlaying = false
-        physicsWorld.speed = 0
-        for child in itemLayer.children {
-            child.isPaused = true
-            child.removeAllActions()
+    func pauseUnpauseGame() {
+        if self.isPlaying {
+            self.isPlaying = false
+            physicsWorld.speed = 0
+            for child in itemLayer.children {
+                child.isPaused = true
+                //child.removeAllActions()
+            }
+            if buttonLayer.parent == nil {
+                self.addChild(buttonLayer)
+            }
+        } else {
+            self.isPlaying = true
+            physicsWorld.speed = 1.0
+            for child in itemLayer.children {
+                child.isPaused = false
+                //child.removeAllActions()
+            }
+            buttonLayer.removeFromParent()
         }
-        if buttonLayer.parent == nil {
-            self.addChild(buttonLayer)
-        }
+
     }
+    
     
     func submitScore() {
         if (GKLocalPlayer.local.isAuthenticated) {
@@ -348,6 +346,7 @@ class GameScene: SKScene {
             item.physicsBody?.velocity = CGVector(dx: 0,
                                                   dy: CGFloat(-itemSpeed))
             
+            //increase touchable area for smaller items
             if item.size.height * item.size.width < 7000 {
                 let largestDimension = max(item.size.height, item.size.width)
                 let touchArea = SKShapeNode(circleOfRadius: largestDimension / 2)
@@ -398,6 +397,50 @@ class GameScene: SKScene {
         recycleBin.zPosition = CGFloat(ZPositions.background.rawValue)
         itemTypeToBin.updateValue(recycleBin, forKey: ItemType.recycle)
         scoringLayer.addChild(recycleBin)
+    }
+    
+    func initMenuButtons() {
+        //initialize in game pause button
+        
+        //system images are vectors and spritekit cannot handle them, so we have to convert
+        var pauseUnpress = UIImage(systemName: "playpause.fill")!
+                                .withTintColor(.darkGray, renderingMode: .alwaysOriginal)
+        pauseUnpress = UIImage(data: pauseUnpress.pngData()!)!
+        
+        var pausePress = UIImage(systemName: "playpause.fill")!
+                                .withTintColor(.lightGray, renderingMode: .alwaysOriginal)
+        pausePress = UIImage(data: pausePress.pngData()!)!
+        
+        //view.safeAreaInsets does not work for some reason
+        let safeAreaInsets = UIApplication.shared.delegate?.window??.safeAreaInsets
+        let pauseButton = Button(label: "pause", location: CGPoint(x: self.frame.midX,
+                                                                   y: self.frame.maxY - safeAreaInsets!.top - pauseUnpress.size.height / 2),
+                                 unpressedImage: pauseUnpress,
+                                 pressedImage: pausePress,
+                                 function: pauseUnpauseGame)
+        pauseButton.zPosition = ZPositions.foreground.rawValue
+        self.addChild(pauseButton)
+        
+        //initialize "game over" buttons
+        let buttonNameToFunction = [("Retry", retryGame),
+                                ("Main Menu", goToMainMenu),
+        ]
+        
+        let pauseOverlay = SKShapeNode(rect: self.frame)
+        pauseOverlay.fillColor = .black
+        pauseOverlay.alpha = 0.5
+        pauseOverlay.lineWidth = 0.0
+        pauseOverlay.zPosition = ZPositions.behindForeground.rawValue
+        buttonLayer.addChild(pauseOverlay)
+        
+        for (index, (name, function)) in buttonNameToFunction.enumerated() {
+            let button = Button(label: name,
+                                location: CGPoint(x: self.frame.midX,
+                                                  y: self.frame.midY + 50 - CGFloat((index * 100))),
+                                function: function)
+            button.zPosition = CGFloat(ZPositions.foreground.rawValue)
+            buttonLayer.addChild(button)
+        }
     }
     
     func loadItemTextures() {
