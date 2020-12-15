@@ -23,6 +23,9 @@
 		166684A825227DB100BBC221 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 166684A725227DB100BBC221 /* Assets.xcassets */; };
 		166684B325227DB100BBC221 /* RecycloneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 166684B225227DB100BBC221 /* RecycloneTests.swift */; };
 		166684BE25227DB100BBC221 /* RecycloneUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 166684BD25227DB100BBC221 /* RecycloneUITests.swift */; };
+		16773EBE2588228B00585823 /* InGameMenuScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16773EBD2588228B00585823 /* InGameMenuScene.swift */; };
+		16773EBF2588228B00585823 /* InGameMenuScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16773EBD2588228B00585823 /* InGameMenuScene.swift */; };
+		16773EC02588228B00585823 /* InGameMenuScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16773EBD2588228B00585823 /* InGameMenuScene.swift */; };
 		1695087D256DCC450035E2D5 /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1695087C256DCC450035E2D5 /* Button.swift */; };
 		1695087E256DCC450035E2D5 /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1695087C256DCC450035E2D5 /* Button.swift */; };
 		1695087F256DCC450035E2D5 /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1695087C256DCC450035E2D5 /* Button.swift */; };
@@ -66,6 +69,7 @@
 		166684B925227DB100BBC221 /* RecycloneUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RecycloneUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		166684BD25227DB100BBC221 /* RecycloneUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecycloneUITests.swift; sourceTree = "<group>"; };
 		166684BF25227DB100BBC221 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		16773EBD2588228B00585823 /* InGameMenuScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InGameMenuScene.swift; sourceTree = "<group>"; };
 		1695087C256DCC450035E2D5 /* Button.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Button.swift; sourceTree = "<group>"; };
 		16A34A33256DAE2200EB6645 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
 		16E963032523D22000D05497 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -126,6 +130,7 @@
 				1666849A25227DAF00BBC221 /* AppDelegate.swift */,
 				1666849E25227DAF00BBC221 /* Actions.sks */,
 				166684A025227DAF00BBC221 /* GameScene.swift */,
+				16773EBD2588228B00585823 /* InGameMenuScene.swift */,
 				166684A225227DAF00BBC221 /* GameViewController.swift */,
 				0F7F1E52253F775D003D6DA6 /* MainMenuScene.swift */,
 				16407D2A2564CE6F000CF628 /* MultipeerWrangler.swift */,
@@ -305,6 +310,7 @@
 			files = (
 				166684A125227DAF00BBC221 /* GameScene.swift in Sources */,
 				164E16F0256F26910030E3F1 /* PhysicsCategory.swift in Sources */,
+				16773EBE2588228B00585823 /* InGameMenuScene.swift in Sources */,
 				1695087D256DCC450035E2D5 /* Button.swift in Sources */,
 				166684A325227DAF00BBC221 /* GameViewController.swift in Sources */,
 				0F7F1E53253F775D003D6DA6 /* MainMenuScene.swift in Sources */,
@@ -318,6 +324,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				16773EBF2588228B00585823 /* InGameMenuScene.swift in Sources */,
 				164E16E5256F25370030E3F1 /* Item.swift in Sources */,
 				16407D2C2564CE6F000CF628 /* MultipeerWrangler.swift in Sources */,
 				1695087E256DCC450035E2D5 /* Button.swift in Sources */,
@@ -329,6 +336,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				16773EC02588228B00585823 /* InGameMenuScene.swift in Sources */,
 				164E16E4256F25370030E3F1 /* Item.swift in Sources */,
 				16407D2D2564CE6F000CF628 /* MultipeerWrangler.swift in Sources */,
 				1695087F256DCC450035E2D5 /* Button.swift in Sources */,
@@ -486,7 +494,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = Y4JA93Q3SH;
 				INFOPLIST_FILE = Recyclone/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -494,7 +502,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.3;
+				MARKETING_VERSION = 0.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.RAS.Recyclone;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -510,7 +518,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = Y4JA93Q3SH;
 				INFOPLIST_FILE = Recyclone/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -518,7 +526,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.3;
+				MARKETING_VERSION = 0.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.RAS.Recyclone;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
