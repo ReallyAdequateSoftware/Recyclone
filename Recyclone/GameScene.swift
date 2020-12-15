@@ -418,7 +418,7 @@ class GameScene: SKScene {
         //crossfade can look like its fading to black first because the opacity starts at 0 and shows the background
         //make sure to set next scenes background color to the same as this ones to fix this
         nextScene.backgroundColor = self.backgroundColor
-        let animation = SKTransition.crossFade(withDuration: TimeInterval(1.0))
+        let animation = SKTransition.crossFade(withDuration: TimeInterval(0.5))
         //cleanUp()
         self.view?.presentScene(nextScene, transition: animation)
         

@@ -26,7 +26,7 @@ class Button: SKShapeNode {
         self.unpressed = SKSpriteNode(texture: SKTexture(image: unpressedImage))
         self.unpressed.name = label
         self.pressed = SKSpriteNode(texture: SKTexture(image: pressedImage))
-        self.pressed.zPosition = 1.0
+        self.pressed.zPosition = ZPositions.foreground.rawValue
         self.pressed.name = label
         self.pressed.isHidden = true
         addChild(self.unpressed)
@@ -41,6 +41,7 @@ class Button: SKShapeNode {
         labelNode.name = label
         labelNode.horizontalAlignmentMode = .center
         labelNode.verticalAlignmentMode = .center
+        labelNode.zPosition = ZPositions.foreground.rawValue
         
         //MARK init constants for the button rectangle
         let buttonSize = labelNode.frame.size * 1.15
@@ -66,13 +67,14 @@ class Button: SKShapeNode {
         (self.pressed as! SKShapeNode).strokeColor = pressedColor
         self.pressed.name = label
         self.pressed.isHidden = true
-        self.pressed.zPosition = 1.0
+        self.pressed.zPosition = ZPositions.behindForeground.rawValue
         
         self.unpressed = SKShapeNode(rect: buttonRect,
                                      cornerRadius: 10)
         (self.unpressed as! SKShapeNode).fillColor = unpressedColor
         (self.unpressed as! SKShapeNode).strokeColor = unpressedColor
         self.unpressed.name = label
+        self.unpressed.zPosition = ZPositions.background.rawValue
         
         addChild(self.label!)
         addChild(self.unpressed)
