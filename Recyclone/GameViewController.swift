@@ -35,8 +35,7 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate {
         super.viewDidLoad()
         // Call the GC authentication controller
         authenticateLocalPlayer()
-        
-        let scene = MainMenuScene(size: view.frame.size)
+        let scene = MainMenuScene(size: view.bounds.size)
         scene.gcWranglerDelegate = self
         print(view.bounds.size.height)
         print(view.bounds.size.height)
@@ -48,7 +47,6 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate {
         scene.scaleMode = .resizeFill
         
         skView.presentScene(scene)
-         
     }
     
     // MARK: - AUTHENTICATE LOCAL PLAYER

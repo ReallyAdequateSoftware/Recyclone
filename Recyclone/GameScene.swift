@@ -32,9 +32,10 @@ func sqrt(a: CGFloat) -> CGFloat {
 }
 #endif
 
-enum ZPositions: Int {
+enum ZPositions: CGFloat {
     case background = -1
     case item = 0
+    case behindForeground = 0.5
     case foreground = 1
 }
 
@@ -109,20 +110,20 @@ class GameScene: SKScene {
     var retryButton: Button?
     var mainMenuButton: Button?
     //var buttonNameToFunction = [(String, () -> Void)]()
-    var isPlaying = true
+    var gamePlayIsPaused = false
+    var gameOver = false
     
     let scoringLayer = SKNode()
     let itemLayer = SKNode()
-    let buttonLayer = SKNode()
     
     //map for associating individual touches with items
     private var touchToNode = [UITouch: SKNode]()
     
-    /*
-     when view is loaded
-     */
-    override func didMove(to view: SKView) {
-        backgroundColor = SKColor.white
+    
+    override init(size: CGSize) {
+        super.init(size: size)
+        
+        backgroundColor = .white
         loadItemTextures()
         
         //setup boundary removal physics for performance and game over mechanism
@@ -135,48 +136,26 @@ class GameScene: SKScene {
                                         x: SCREEN_WIDTH + BOUNDARY_OUTSET,
                                         y: -BOUNDARY_OUTSET))
         physicsBody?.categoryBitMask = PhysicsCategory.boundary
-        
-        //initialize "game over" buttons
-        
-        var buttonNameToFunction = [("Retry", retryGame),
-                                ("Main Menu", goToMainMenu),
-        ]
-        
-        for (index, (name, function)) in buttonNameToFunction.enumerated() {
-            let button = Button(label: name,
-                                location: CGPoint(x: self.frame.midX,
-                                                  y: self.frame.midY + 50 - CGFloat((index * 100))),
-                                function: function)
-            button.zPosition = CGFloat(ZPositions.foreground.rawValue)
-            buttonLayer.addChild(button)
-        }
-        
         initScoring()
+        initPauseButton()
         
         self.addChild(scoringLayer)
         self.addChild(itemLayer)
-        
     }
     
-    // TODO: maybe these should be combined into single function that decides next scene based off the buttons name
-    func retryGame() -> Void {
-        let nextScene = GameScene(size: self.size)
-        nextScene.gcWranglerDelegate = self.gcWranglerDelegate
-        nextScene.scaleMode = self.scaleMode
-        let animation = SKTransition.crossFade(withDuration: TimeInterval(1.0))
-        cleanUp()
-        self.view?.presentScene(nextScene, transition: animation)
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
-    func goToMainMenu() -> Void {
-        let nextScene = MainMenuScene(size: self.size)
-        // TODO: seems like bad practice to manually set delegate rather than in an init somewhere
-        nextScene.gcWranglerDelegate = self.gcWranglerDelegate
-        nextScene.scaleMode = self.scaleMode
-        let animation = SKTransition.crossFade(withDuration: TimeInterval(1.0))
-        cleanUp()
-        self.view?.presentScene(nextScene, transition: animation)
+    /*
+     when view is loaded
+     */
+    override func didMove(to view: SKView) {
+        if gamePlayIsPaused {
+            unpauseGame()
+        }
     }
+    
     
     /*
      HANDLE TOUCH EVENTS
@@ -202,7 +181,7 @@ class GameScene: SKScene {
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches{
             if let itemNode = touchToNode[touch],
-                self.isPlaying { //only update touch map when the item touched is an item and we're still playing
+                !gamePlayIsPaused { //only update touch map when the item touched is an item and we're still playing
                 itemNode.isPaused = true
                 itemNode.position = touch.location(in: self)
             }
@@ -259,7 +238,8 @@ class GameScene: SKScene {
             child.removeAllChildren()
             child.removeFromParent()
         }
-        self.isPlaying = false
+        self.gamePlayIsPaused = true
+        self.gameOver = true
         self.retryButton = nil
         self.mainMenuButton = nil
         self.itemsMissed = 0
@@ -271,7 +251,7 @@ class GameScene: SKScene {
         self.lastTimeInterval = currentTime
         self.itemDropCountdown -= delta
         
-        if (self.itemDropCountdown <= 0 && isPlaying) {
+        if (self.itemDropCountdown <= 0 && !gamePlayIsPaused) {
             addItem()
             self.itemDropCountdown = self.itemDropInterval
         }
@@ -282,23 +262,13 @@ class GameScene: SKScene {
      */
     override func didSimulatePhysics() {
         //only check endgame when physics changes -> contacts are made
-        if(self.itemsMissed >= 10 && self.isPlaying){
+        if(self.itemsMissed >= 10 && !gamePlayIsPaused){
+            gameOver = true
             pauseGame()
             submitScore()
         }
     }
     
-    func pauseGame() {
-        self.isPlaying = false
-        physicsWorld.speed = 0
-        for child in itemLayer.children {
-            child.isPaused = true
-            child.removeAllActions()
-        }
-        if buttonLayer.parent == nil {
-            self.addChild(buttonLayer)
-        }
-    }
     
     func submitScore() {
         if (GKLocalPlayer.local.isAuthenticated) {
@@ -348,6 +318,7 @@ class GameScene: SKScene {
             item.physicsBody?.velocity = CGVector(dx: 0,
                                                   dy: CGFloat(-itemSpeed))
             
+            //increase touchable area for smaller items
             if item.size.height * item.size.width < 7000 {
                 let largestDimension = max(item.size.height, item.size.width)
                 let touchArea = SKShapeNode(circleOfRadius: largestDimension / 2)
@@ -398,6 +369,86 @@ class GameScene: SKScene {
         recycleBin.zPosition = CGFloat(ZPositions.background.rawValue)
         itemTypeToBin.updateValue(recycleBin, forKey: ItemType.recycle)
         scoringLayer.addChild(recycleBin)
+    }
+    
+    func initPauseButton() {
+        //system images are vectors and spritekit cannot handle them, so we have to convert
+        var pauseUnpress = UIImage(systemName: "pause.fill")!
+                                .withTintColor(.darkGray, renderingMode: .alwaysOriginal)
+        pauseUnpress = UIImage(data: pauseUnpress.pngData()!)!
+        
+        var pausePress = UIImage(systemName: "pause.fill")!
+                                .withTintColor(.lightGray, renderingMode: .alwaysOriginal)
+        pausePress = UIImage(data: pausePress.pngData()!)!
+        
+        //view.safeAreaInsets does not work for some reason
+        let safeAreaInsets = UIApplication.shared.delegate?.window??.safeAreaInsets
+        let pauseButton = Button(label: "pause", location: CGPoint(x: self.frame.midX,
+                                                                   y: self.frame.maxY - safeAreaInsets!.top - pauseUnpress.size.height / 2),
+                                 unpressedImage: pauseUnpress,
+                                 pressedImage: pausePress,
+                                 function: pauseGame)
+        pauseButton.zPosition = ZPositions.foreground.rawValue
+        self.addChild(pauseButton)
+    }
+    
+    func unpauseGame() {
+        gamePlayIsPaused = false
+        physicsWorld.speed = 1.0
+        for child in itemLayer.children {
+            child.isPaused = false
+        }
+    }
+    
+    func pauseGame() {
+        gamePlayIsPaused = true
+        physicsWorld.speed = 0
+        for child in itemLayer.children {
+            child.isPaused = true
+            //child.removeAllActions()
+        }
+        
+        let blurredGameSceneImage = blurImage(with: getScreenshot()!, blurAmount: 40.0)
+        let nextScene = InGameMenuScene(size: self.size,
+                                        background: blurredGameSceneImage,
+                                        gcWranglerDelegate: self.gcWranglerDelegate!,
+                                        previousScene: self,
+                                        gameOver: self.gameOver)
+        nextScene.scaleMode = self.scaleMode
+        //crossfade can look like its fading to black first because the opacity starts at 0 and shows the background
+        //make sure to set next scenes background color to the same as this ones to fix this
+        nextScene.backgroundColor = self.backgroundColor
+        let animation = SKTransition.crossFade(withDuration: TimeInterval(1.0))
+        //cleanUp()
+        self.view?.presentScene(nextScene, transition: animation)
+        
+    }
+    
+    func getScreenshot() -> UIImage? {
+        //self.scene!.view?.bounds
+        let bounds = self.view?.bounds
+        UIGraphicsBeginImageContextWithOptions(bounds!.size, true, UIScreen.main.scale)
+        self.view?.drawHierarchy(in: bounds!, afterScreenUpdates: true)
+        guard let screenshot = UIGraphicsGetImageFromCurrentImageContext() else { return nil }
+        UIGraphicsEndImageContext()
+        return screenshot;
+    }
+    
+    func blurImage(with sourceImage: UIImage, blurAmount: CGFloat) -> UIImage {
+        //  Create our blurred image
+        let context = CIContext(options: nil)
+        let inputImage = CIImage(cgImage: sourceImage.cgImage!)
+        //  Setting up Gaussian Blur
+        let filter = CIFilter(name: "CIGaussianBlur")
+        filter?.setValue(inputImage, forKey: kCIInputImageKey)
+        filter?.setValue(blurAmount, forKey: "inputRadius")
+        let result = filter?.value(forKey: kCIOutputImageKey) as? CIImage
+
+       /*  CIGaussianBlur has a tendency to shrink the image a little, this ensures it matches
+        *  up exactly to the bounds of our original image */
+
+        let cgImage = context.createCGImage(result ?? CIImage(), from: inputImage.extent)
+        return UIImage(cgImage: cgImage!, scale: sourceImage.scale * 0.98, orientation: sourceImage.imageOrientation)
     }
     
     func loadItemTextures() {

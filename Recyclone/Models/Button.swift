@@ -9,11 +9,29 @@ import Foundation
 import SpriteKit
 
 class Button: SKShapeNode {
-    private var label: SKLabelNode
-    private var unpressed: SKShapeNode
-    private var pressed: SKShapeNode
+    private var label: SKLabelNode?
+    private var unpressed: SKNode
+    private var pressed: SKNode
     private var impactFeedback = UIImpactFeedbackGenerator(style: .medium)
     private var action: (() -> Void)?
+    
+    convenience init(label: String, location: CGPoint, unpressedImage: UIImage, pressedImage: UIImage, function: (() -> Void)? = nil) {
+        self.init(rect: CGRect(origin: location,
+                               size: unpressedImage.size))
+        self.name = label
+        self.isUserInteractionEnabled = true
+        self.lineWidth = 0
+        self.position = location
+        self.action = function
+        self.unpressed = SKSpriteNode(texture: SKTexture(image: unpressedImage))
+        self.unpressed.name = label
+        self.pressed = SKSpriteNode(texture: SKTexture(image: pressedImage))
+        self.pressed.zPosition = 1.0
+        self.pressed.name = label
+        self.pressed.isHidden = true
+        addChild(self.unpressed)
+        addChild(self.pressed)
+    }
     
     convenience init(label: String, location: CGPoint, unpressedColor: UIColor = SKColor.lightGray, pressedColor: UIColor = SKColor.darkGray, textColor: UIColor = SKColor.black, function: (() -> Void)? = nil) {
         
@@ -43,18 +61,20 @@ class Button: SKShapeNode {
 
         self.pressed = SKShapeNode(rect: buttonRect,
                                    cornerRadius: 10)
-        self.pressed.fillColor = pressedColor
-        self.pressed.strokeColor = pressedColor
+        
+        (self.pressed as! SKShapeNode).fillColor = pressedColor
+        (self.pressed as! SKShapeNode).strokeColor = pressedColor
         self.pressed.name = label
         self.pressed.isHidden = true
+        self.pressed.zPosition = 1.0
         
         self.unpressed = SKShapeNode(rect: buttonRect,
                                      cornerRadius: 10)
-        self.unpressed.fillColor = unpressedColor
-        self.unpressed.strokeColor = unpressedColor
+        (self.unpressed as! SKShapeNode).fillColor = unpressedColor
+        (self.unpressed as! SKShapeNode).strokeColor = unpressedColor
         self.unpressed.name = label
         
-        addChild(self.label)
+        addChild(self.label!)
         addChild(self.unpressed)
         addChild(self.pressed)
     }
