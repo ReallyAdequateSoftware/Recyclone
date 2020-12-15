@@ -48,11 +48,14 @@ class InGameMenuScene: SKScene {
         if !gameOver {
             buttonNameToFunction.insert(("Resume", resumePlaying), at: 0)
         }
+        let BUTTON_OFFSET = 100
+        let TOTAL_OFFSET = BUTTON_OFFSET * (buttonNameToFunction.count - 1)
+        let TOP_MOST_BUTTON_POSITION = self.frame.midY + CGFloat(TOTAL_OFFSET) * 0.5
         
         for (index, (name, function)) in buttonNameToFunction.enumerated() {
             let button = Button(label: name,
                                 location: CGPoint(x: self.frame.midX,
-                                                  y: self.frame.midY + 50 - CGFloat((index * 100))),
+                                                  y: TOP_MOST_BUTTON_POSITION - CGFloat(index * BUTTON_OFFSET)),
                                 function: function)
             buttonLayer.addChild(button)
         }
