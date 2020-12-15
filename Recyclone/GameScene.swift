@@ -57,14 +57,14 @@ extension GameScene: SKPhysicsContactDelegate{
         //remove the item if it contacted the boundary
         if contact.bodyA.categoryBitMask == PhysicsCategory.item {
             contact.bodyA.node?.removeFromParent()
-            self.hapticFeedback.notificationOccurred(.warning)
+            LookAndFeel.gameplayFeedback.notificationOccurred(.warning)
             itemsMissed += 1
             print("item removed")
         }
         
         if contact.bodyB.categoryBitMask == PhysicsCategory.item {
             contact.bodyB.node?.removeFromParent()
-            self.hapticFeedback.notificationOccurred(.warning)
+            LookAndFeel.gameplayFeedback.notificationOccurred(.warning)
             itemsMissed += 1
             print("item removed")
         }
@@ -102,14 +102,9 @@ class GameScene: SKScene {
     var compostBin = SKSpriteNode()
     var recycleBin = SKSpriteNode()
     let BOUNDARY_OUTSET = CGFloat(100)
-    let FONT_SIZE = 30
-    let FONT_NAME = "HelveticaNeue"
     var itemTypeToBin = [ItemType : SKNode]()
-    let hapticFeedback = UINotificationFeedbackGenerator()
-    let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
     var retryButton: Button?
     var mainMenuButton: Button?
-    //var buttonNameToFunction = [(String, () -> Void)]()
     var gamePlayIsPaused = false
     var gameOver = false
     
@@ -123,7 +118,7 @@ class GameScene: SKScene {
     override init(size: CGSize) {
         super.init(size: size)
         
-        backgroundColor = .white
+        backgroundColor = LookAndFeel.currentColorScheme.gameBackground
         loadItemTextures()
         
         //setup boundary removal physics for performance and game over mechanism
@@ -161,7 +156,7 @@ class GameScene: SKScene {
      HANDLE TOUCH EVENTS
      */
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        impactFeedback.prepare()
+        LookAndFeel.gameplayFeedback.prepare()
         for touch in touches{
             let location = touch.location(in: self)
             let touchedNodes = self.nodes(at: location)
@@ -190,7 +185,6 @@ class GameScene: SKScene {
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        self.impactFeedback.prepare()
         for touch in touches {
             
             let touchedNodes = self.nodes(at: touch.location(in: self))
@@ -202,7 +196,7 @@ class GameScene: SKScene {
                         let binNode = itemTypeToBin[texture.type]!
 
                         if  binNode.intersects(previouslyTouched) { //check if the item was placed in the right bin
-                            impactFeedback.impactOccurred()
+                            LookAndFeel.buttonFeedback.impactOccurred()
                             score += 1
                             evaluateDifficulty()
                             previouslyTouched.removeFromParent()
@@ -341,18 +335,18 @@ class GameScene: SKScene {
                                      y: SCREEN_HEIGHT - BOUNDARY_OUTSET)
         scoreNode.zPosition = CGFloat(ZPositions.foreground.rawValue)
         scoreNode.text = "\(score)"
-        scoreNode.fontColor = UIColor.green
-        scoreNode.fontSize = CGFloat(FONT_SIZE)
-        scoreNode.fontName = FONT_NAME
+        scoreNode.fontColor = LookAndFeel.currentColorScheme.scoredItemsText
+        scoreNode.fontSize = LookAndFeel.fontScheme.defaultFontSize
+        scoreNode.fontName = LookAndFeel.fontScheme.scoreFontName
         scoringLayer.addChild(scoreNode)
         
         itemsMissedNode.text = "\(itemsMissed)"
         itemsMissedNode.position = CGPoint(x: SCREEN_WIDTH * 0.75,
                                            y: SCREEN_HEIGHT - BOUNDARY_OUTSET)
         itemsMissedNode.zPosition = CGFloat(ZPositions.foreground.rawValue)
-        itemsMissedNode.fontColor = UIColor.red
-        itemsMissedNode.fontSize = CGFloat(FONT_SIZE)
-        itemsMissedNode.fontName = FONT_NAME
+        itemsMissedNode.fontColor = LookAndFeel.currentColorScheme.missedItemsText
+        itemsMissedNode.fontSize = LookAndFeel.fontScheme.defaultFontSize
+        itemsMissedNode.fontName = LookAndFeel.fontScheme.scoreFontName
         scoringLayer.addChild(itemsMissedNode)
         
         //setup scoring bins
@@ -374,11 +368,11 @@ class GameScene: SKScene {
     func initPauseButton() {
         //system images are vectors and spritekit cannot handle them, so we have to convert
         var pauseUnpress = UIImage(systemName: "pause.fill")!
-                                .withTintColor(.darkGray, renderingMode: .alwaysOriginal)
+            .withTintColor(LookAndFeel.currentColorScheme.unpressedButton, renderingMode: .alwaysOriginal)
         pauseUnpress = UIImage(data: pauseUnpress.pngData()!)!
         
         var pausePress = UIImage(systemName: "pause.fill")!
-                                .withTintColor(.lightGray, renderingMode: .alwaysOriginal)
+                                .withTintColor(LookAndFeel.currentColorScheme.pressedButton, renderingMode: .alwaysOriginal)
         pausePress = UIImage(data: pausePress.pngData()!)!
         
         //view.safeAreaInsets does not work for some reason
