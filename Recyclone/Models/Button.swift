@@ -12,7 +12,6 @@ class Button: SKShapeNode {
     private var label: SKLabelNode?
     private var unpressed: SKNode
     private var pressed: SKNode
-    private var impactFeedback = UIImpactFeedbackGenerator(style: .medium)
     private var action: (() -> Void)?
     
     convenience init(label: String, location: CGPoint, unpressedImage: UIImage, pressedImage: UIImage, function: (() -> Void)? = nil) {
@@ -33,11 +32,18 @@ class Button: SKShapeNode {
         addChild(self.pressed)
     }
     
-    convenience init(label: String, location: CGPoint, unpressedColor: UIColor = SKColor.lightGray, pressedColor: UIColor = SKColor.darkGray, textColor: UIColor = SKColor.black, function: (() -> Void)? = nil) {
+    convenience init(label: String,
+                     location: CGPoint,
+                     unpressedColor: UIColor = LookAndFeel.currentColorScheme.unpressedButton,
+                     pressedColor: UIColor = LookAndFeel.currentColorScheme.pressedButton,
+                     textColor: UIColor = LookAndFeel.currentColorScheme.buttonText,
+                     function: (() -> Void)? = nil) {
         
         //MARK init node for the label
         let labelNode = SKLabelNode(text: label)
-        labelNode.fontColor = SKColor.black
+        labelNode.fontName = LookAndFeel.fontScheme.buttonFontName
+        labelNode.fontSize = LookAndFeel.fontScheme.buttonFontSize
+        labelNode.fontColor = textColor
         labelNode.name = label
         labelNode.horizontalAlignmentMode = .center
         labelNode.verticalAlignmentMode = .center
@@ -91,12 +97,12 @@ class Button: SKShapeNode {
     
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        impactFeedback.impactOccurred()
+        LookAndFeel.buttonFeedback.impactOccurred()
         self.pressed.isHidden = false
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        impactFeedback.impactOccurred()
+        LookAndFeel.buttonFeedback.impactOccurred()
         if self.action != nil{
             self.action!()
         }
