@@ -98,11 +98,14 @@ class Button: SKShapeNode {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         LookAndFeel.buttonFeedback.impactOccurred()
+        LookAndFeel.audioScheme.buttonPress.play()
         self.pressed.isHidden = false
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         LookAndFeel.buttonFeedback.impactOccurred()
+        LookAndFeel.audioScheme.buttonRelease.play()
+        
         if self.action != nil{
             self.action!()
         }
