@@ -50,6 +50,10 @@ class MainMenuScene: SKScene {
                                 function: function)
             self.addChild(button)
         }
+        
+        DispatchQueue.global().async {
+            LookAndFeel.audioScheme
+        }
 
     }
     

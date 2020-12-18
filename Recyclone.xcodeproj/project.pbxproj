@@ -15,6 +15,12 @@
 		164E16E4256F25370030E3F1 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 164E16DF256F25250030E3F1 /* Item.swift */; };
 		164E16E5256F25370030E3F1 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 164E16DF256F25250030E3F1 /* Item.swift */; };
 		164E16F0256F26910030E3F1 /* PhysicsCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 164E16EF256F26910030E3F1 /* PhysicsCategory.swift */; };
+		1650D166258C38E0003A628F /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1650D165258C38E0003A628F /* Extensions.swift */; };
+		1650D167258C38E0003A628F /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1650D165258C38E0003A628F /* Extensions.swift */; };
+		1650D179258C4D4A003A628F /* buttonpress.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1650D177258C4D4A003A628F /* buttonpress.wav */; };
+		1650D17A258C4D4A003A628F /* buttonpress.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1650D177258C4D4A003A628F /* buttonpress.wav */; };
+		1650D17B258C4D4A003A628F /* buttonrelease.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1650D178258C4D4A003A628F /* buttonrelease.wav */; };
+		1650D17C258C4D4A003A628F /* buttonrelease.wav in Resources */ = {isa = PBXBuildFile; fileRef = 1650D178258C4D4A003A628F /* buttonrelease.wav */; };
 		1666849B25227DAF00BBC221 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1666849A25227DAF00BBC221 /* AppDelegate.swift */; };
 		1666849F25227DAF00BBC221 /* Actions.sks in Resources */ = {isa = PBXBuildFile; fileRef = 1666849E25227DAF00BBC221 /* Actions.sks */; };
 		166684A125227DAF00BBC221 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 166684A025227DAF00BBC221 /* GameScene.swift */; };
@@ -30,6 +36,8 @@
 		1695087E256DCC450035E2D5 /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1695087C256DCC450035E2D5 /* Button.swift */; };
 		1695087F256DCC450035E2D5 /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1695087C256DCC450035E2D5 /* Button.swift */; };
 		16A34A34256DAE2200EB6645 /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16A34A33256DAE2200EB6645 /* GameKit.framework */; };
+		16D90778258AED22002D0629 /* missed.wav in Resources */ = {isa = PBXBuildFile; fileRef = 16D90776258AED22002D0629 /* missed.wav */; };
+		16D90779258AED22002D0629 /* success.wav in Resources */ = {isa = PBXBuildFile; fileRef = 16D90777258AED22002D0629 /* success.wav */; };
 		16E963072523D35900D05497 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 16E963032523D22000D05497 /* LaunchScreen.storyboard */; };
 		16F443DB25895EC60076CEEA /* LookAndFeel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16F443DA25895EC60076CEEA /* LookAndFeel.swift */; };
 		16F443DC25895EC60076CEEA /* LookAndFeel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16F443DA25895EC60076CEEA /* LookAndFeel.swift */; };
@@ -58,6 +66,9 @@
 		16407D2A2564CE6F000CF628 /* MultipeerWrangler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipeerWrangler.swift; sourceTree = "<group>"; };
 		164E16DF256F25250030E3F1 /* Item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Item.swift; sourceTree = "<group>"; };
 		164E16EF256F26910030E3F1 /* PhysicsCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhysicsCategory.swift; sourceTree = "<group>"; };
+		1650D165258C38E0003A628F /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		1650D177258C4D4A003A628F /* buttonpress.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = buttonpress.wav; sourceTree = "<group>"; };
+		1650D178258C4D4A003A628F /* buttonrelease.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = buttonrelease.wav; sourceTree = "<group>"; };
 		1666849725227DAF00BBC221 /* Recyclone.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Recyclone.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1666849A25227DAF00BBC221 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1666849E25227DAF00BBC221 /* Actions.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Actions.sks; sourceTree = "<group>"; };
@@ -75,6 +86,8 @@
 		16773EBD2588228B00585823 /* InGameMenuScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InGameMenuScene.swift; sourceTree = "<group>"; };
 		1695087C256DCC450035E2D5 /* Button.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Button.swift; sourceTree = "<group>"; };
 		16A34A33256DAE2200EB6645 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
+		16D90776258AED22002D0629 /* missed.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = missed.wav; sourceTree = "<group>"; };
+		16D90777258AED22002D0629 /* success.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = success.wav; sourceTree = "<group>"; };
 		16E963032523D22000D05497 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		16F443DA25895EC60076CEEA /* LookAndFeel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LookAndFeel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -129,6 +142,7 @@
 		1666849925227DAF00BBC221 /* Recyclone */ = {
 			isa = PBXGroup;
 			children = (
+				16FB8EA1258AABB60031C649 /* sounds */,
 				16950883256DCC680035E2D5 /* Models */,
 				16E963032523D22000D05497 /* LaunchScreen.storyboard */,
 				1666849A25227DAF00BBC221 /* AppDelegate.swift */,
@@ -170,6 +184,7 @@
 				16407D2A2564CE6F000CF628 /* MultipeerWrangler.swift */,
 				164E16DF256F25250030E3F1 /* Item.swift */,
 				164E16EF256F26910030E3F1 /* PhysicsCategory.swift */,
+				1650D165258C38E0003A628F /* Extensions.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -180,6 +195,17 @@
 				16A34A33256DAE2200EB6645 /* GameKit.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		16FB8EA1258AABB60031C649 /* sounds */ = {
+			isa = PBXGroup;
+			children = (
+				1650D177258C4D4A003A628F /* buttonpress.wav */,
+				1650D178258C4D4A003A628F /* buttonrelease.wav */,
+				16D90776258AED22002D0629 /* missed.wav */,
+				16D90777258AED22002D0629 /* success.wav */,
+			);
+			path = sounds;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -285,8 +311,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1650D179258C4D4A003A628F /* buttonpress.wav in Resources */,
 				166684A625227DAF00BBC221 /* Main.storyboard in Resources */,
+				1650D17B258C4D4A003A628F /* buttonrelease.wav in Resources */,
 				16E963072523D35900D05497 /* LaunchScreen.storyboard in Resources */,
+				16D90779258AED22002D0629 /* success.wav in Resources */,
+				16D90778258AED22002D0629 /* missed.wav in Resources */,
 				166684A825227DB100BBC221 /* Assets.xcassets in Resources */,
 				1666849F25227DAF00BBC221 /* Actions.sks in Resources */,
 			);
@@ -296,6 +326,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1650D17C258C4D4A003A628F /* buttonrelease.wav in Resources */,
+				1650D17A258C4D4A003A628F /* buttonpress.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -322,6 +354,7 @@
 				164E16E0256F25250030E3F1 /* Item.swift in Sources */,
 				16F443DB25895EC60076CEEA /* LookAndFeel.swift in Sources */,
 				16407D2B2564CE6F000CF628 /* MultipeerWrangler.swift in Sources */,
+				1650D166258C38E0003A628F /* Extensions.swift in Sources */,
 				1666849B25227DAF00BBC221 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -336,6 +369,7 @@
 				1695087E256DCC450035E2D5 /* Button.swift in Sources */,
 				166684B325227DB100BBC221 /* RecycloneTests.swift in Sources */,
 				16F443DC25895EC60076CEEA /* LookAndFeel.swift in Sources */,
+				1650D167258C38E0003A628F /* Extensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -49,22 +49,18 @@ extension CGPoint {
     }
 }
 
-/*
- handle missed items
- */
+//MARK: Remove items from screen
 extension GameScene: SKPhysicsContactDelegate{
     func didBegin(_ contact: SKPhysicsContact){
         //remove the item if it contacted the boundary
-        if contact.bodyA.categoryBitMask == PhysicsCategory.item {
-            contact.bodyA.node?.removeFromParent()
+        let categoryBodyA = contact.bodyA.categoryBitMask
+        let categoryBodyB = contact.bodyB.categoryBitMask
+        if  categoryBodyA == PhysicsCategory.item && categoryBodyB == PhysicsCategory.boundary ||
+                categoryBodyA == PhysicsCategory.boundary && categoryBodyB == PhysicsCategory.item {
+            
+            (categoryBodyA == PhysicsCategory.item ? contact.bodyA.node : contact.bodyB.node)?.removeFromParent()
             LookAndFeel.gameplayFeedback.notificationOccurred(.warning)
-            itemsMissed += 1
-            print("item removed")
-        }
-        
-        if contact.bodyB.categoryBitMask == PhysicsCategory.item {
-            contact.bodyB.node?.removeFromParent()
-            LookAndFeel.gameplayFeedback.notificationOccurred(.warning)
+            LookAndFeel.audioScheme.missed.play()
             itemsMissed += 1
             print("item removed")
         }
@@ -124,13 +120,14 @@ class GameScene: SKScene {
         //setup boundary removal physics for performance and game over mechanism
         physicsWorld.gravity = CGVector(dx: 0, dy: 0)
         physicsWorld.contactDelegate = self
-        physicsBody = SKPhysicsBody(edgeFrom: CGPoint(
-                                        x: -BOUNDARY_OUTSET,
-                                        y: -BOUNDARY_OUTSET),
-                                    to: CGPoint(
-                                        x: SCREEN_WIDTH + BOUNDARY_OUTSET,
-                                        y: -BOUNDARY_OUTSET))
-        physicsBody?.categoryBitMask = PhysicsCategory.boundary
+        self.physicsBody = SKPhysicsBody(edgeFrom: CGPoint(
+                                            x: -BOUNDARY_OUTSET,
+                                            y: -BOUNDARY_OUTSET),
+                                         to: CGPoint(
+                                            x: SCREEN_WIDTH + BOUNDARY_OUTSET,
+                                            y: -BOUNDARY_OUTSET))
+        self.physicsBody?.categoryBitMask = PhysicsCategory.boundary
+        
         initScoring()
         initPauseButton()
         
@@ -152,9 +149,7 @@ class GameScene: SKScene {
     }
     
     
-    /*
-     HANDLE TOUCH EVENTS
-     */
+    //MARK: Touch event handling
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         LookAndFeel.gameplayFeedback.prepare()
         for touch in touches{
@@ -176,7 +171,7 @@ class GameScene: SKScene {
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches{
             if let itemNode = touchToNode[touch],
-                !gamePlayIsPaused { //only update touch map when the item touched is an item and we're still playing
+               !gamePlayIsPaused { //only update touch map when the item touched is an item and we're still playing
                 itemNode.isPaused = true
                 itemNode.position = touch.location(in: self)
             }
@@ -194,9 +189,10 @@ class GameScene: SKScene {
                     if previouslyTouched.parent == itemLayer { //handle trash items
                         let texture = (previouslyTouched as! Item).itemTexture
                         let binNode = itemTypeToBin[texture.type]!
-
+                        
                         if  binNode.intersects(previouslyTouched) { //check if the item was placed in the right bin
                             LookAndFeel.buttonFeedback.impactOccurred()
+                            LookAndFeel.audioScheme.success.play()
                             score += 1
                             evaluateDifficulty()
                             previouslyTouched.removeFromParent()
@@ -239,6 +235,7 @@ class GameScene: SKScene {
         self.itemsMissed = 0
     }
     
+    //MARK: Spawn items clock
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
         let delta = currentTime - self.lastTimeInterval
@@ -251,9 +248,7 @@ class GameScene: SKScene {
         }
     }
     
-    /*
-     run after any of the physics changes
-     */
+    //MARK: Check endgame conditions
     override func didSimulatePhysics() {
         //only check endgame when physics changes -> contacts are made
         if(self.itemsMissed >= 10 && !gamePlayIsPaused){
@@ -287,8 +282,8 @@ class GameScene: SKScene {
     func random(min: CGFloat, max:CGFloat) -> CGFloat{
         return random() * (max-min) + min
     }
-
     
+    //MARK: Difficulty calculation
     func evaluateDifficulty() {
         if score % 10 == 0 {
             itemDropInterval *= ITEM_INTERVAL_MULTI
@@ -365,6 +360,7 @@ class GameScene: SKScene {
         scoringLayer.addChild(recycleBin)
     }
     
+    //MARK: Pause
     func initPauseButton() {
         //system images are vectors and spritekit cannot handle them, so we have to convert
         var pauseUnpress = UIImage(systemName: "pause.fill")!
@@ -372,7 +368,7 @@ class GameScene: SKScene {
         pauseUnpress = UIImage(data: pauseUnpress.pngData()!)!
         
         var pausePress = UIImage(systemName: "pause.fill")!
-                                .withTintColor(LookAndFeel.currentColorScheme.pressedButton, renderingMode: .alwaysOriginal)
+            .withTintColor(LookAndFeel.currentColorScheme.pressedButton, renderingMode: .alwaysOriginal)
         pausePress = UIImage(data: pausePress.pngData()!)!
         
         //view.safeAreaInsets does not work for some reason
@@ -402,19 +398,25 @@ class GameScene: SKScene {
             //child.removeAllActions()
         }
         
-        let blurredGameSceneImage = blurImage(with: getScreenshot()!, blurAmount: 40.0)
-        let nextScene = InGameMenuScene(size: self.size,
-                                        background: blurredGameSceneImage,
-                                        gcWranglerDelegate: self.gcWranglerDelegate!,
-                                        previousScene: self,
-                                        gameOver: self.gameOver)
-        nextScene.scaleMode = self.scaleMode
-        //crossfade can look like its fading to black first because the opacity starts at 0 and shows the background
-        //make sure to set next scenes background color to the same as this ones to fix this
-        nextScene.backgroundColor = self.backgroundColor
-        let animation = SKTransition.crossFade(withDuration: TimeInterval(0.5))
-        //cleanUp()
-        self.view?.presentScene(nextScene, transition: animation)
+        if let screenshot = getScreenshot() {
+            DispatchQueue.global(qos: .userInteractive).async {
+                let blurredGameSceneImage = self.blurImage(with: screenshot, blurAmount: 40.0)
+                DispatchQueue.main.async {
+                    let nextScene = InGameMenuScene(size: self.size,
+                                                    background: blurredGameSceneImage,
+                                                    gcWranglerDelegate: self.gcWranglerDelegate!,
+                                                    previousScene: self,
+                                                    gameOver: self.gameOver)
+                    nextScene.scaleMode = self.scaleMode
+                    //crossfade can look like its fading to black first because the opacity starts at 0 and shows the background
+                    //make sure to set next scenes background color to the same as this ones to fix this
+                    nextScene.backgroundColor = self.backgroundColor
+                    let animation = SKTransition.crossFade(withDuration: TimeInterval(0.4))
+                    //cleanUp()
+                    self.view?.presentScene(nextScene, transition: animation)
+                }
+            }
+        }
         
     }
     
@@ -437,10 +439,10 @@ class GameScene: SKScene {
         filter?.setValue(inputImage, forKey: kCIInputImageKey)
         filter?.setValue(blurAmount, forKey: "inputRadius")
         let result = filter?.value(forKey: kCIOutputImageKey) as? CIImage
-
-       /*  CIGaussianBlur has a tendency to shrink the image a little, this ensures it matches
-        *  up exactly to the bounds of our original image */
-
+        
+        /*  CIGaussianBlur has a tendency to shrink the image a little, this ensures it matches
+         *  up exactly to the bounds of our original image */
+        
         let cgImage = context.createCGImage(result ?? CIImage(), from: inputImage.extent)
         return UIImage(cgImage: cgImage!, scale: sourceImage.scale * 0.98, orientation: sourceImage.imageOrientation)
     }
