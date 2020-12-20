@@ -41,8 +41,8 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate {
         print(view.bounds.size.height)
         print(view.frame.size)
         let skView = view as! SKView
-        skView.showsFPS = true
-        skView.showsNodeCount = true
+        //skView.showsFPS = true
+        //skView.showsNodeCount = true
         skView.ignoresSiblingOrder = true
         scene.scaleMode = .resizeFill
         

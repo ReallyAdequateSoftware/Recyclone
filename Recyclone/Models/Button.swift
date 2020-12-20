@@ -14,6 +14,7 @@ class Button: SKShapeNode {
     private var pressed: SKNode
     private var action: (() -> Void)?
     
+    
     convenience init(label: String, location: CGPoint, unpressedImage: UIImage, pressedImage: UIImage, function: (() -> Void)? = nil) {
         self.init(rect: CGRect(origin: location,
                                size: unpressedImage.size))
@@ -49,15 +50,16 @@ class Button: SKShapeNode {
         labelNode.verticalAlignmentMode = .center
         labelNode.zPosition = ZPositions.foreground.rawValue
         
-        //MARK init constants for the button rectangle
-        let buttonSize = labelNode.frame.size * 1.15
+        let BUTTON_PADDING_HEIGHT: CGFloat = 17
+        let BUTTON_PADDING_WIDTH: CGFloat = 20
+
+        let buttonSize = CGSize(width: labelNode.frame.size.width + BUTTON_PADDING_WIDTH,
+                                height: labelNode.fontSize + BUTTON_PADDING_HEIGHT)
         let buttonRect = CGRect(origin: CGPoint(x: -buttonSize.width / 2,
                                                 y: -buttonSize.height / 2),
                                 size: buttonSize)
         
-        self.init(rect: CGRect(origin: CGPoint(x: -buttonSize.width / 2,
-                                                y: -buttonSize.height / 2),
-                                size: buttonSize))
+        self.init(rect: buttonRect)
         
         self.position = location
         self.name = label
