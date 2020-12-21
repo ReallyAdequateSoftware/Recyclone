@@ -31,8 +31,8 @@ class MainMenuScene: SKScene {
         self.backgroundColor = LookAndFeel.currentColorScheme.menuBackground
         
         let label = SKLabelNode(text: "Recyclone")
-        label.fontName = LookAndFeel.fontScheme.headingFontName
-        label.fontSize = LookAndFeel.fontScheme.headingTextSize
+        label.fontName = LookAndFeel.fontScheme.titleFontName
+        label.fontSize = LookAndFeel.fontScheme.titleTextSize
         label.fontColor = LookAndFeel.currentColorScheme.defaultText
         label.position = CGPoint(x: self.frame.midX, y: self.frame.midY + 200)
         addChild(label)

@@ -331,7 +331,7 @@ class GameScene: SKScene {
         scoreNode.zPosition = CGFloat(ZPositions.foreground.rawValue)
         scoreNode.text = "\(score)"
         scoreNode.fontColor = LookAndFeel.currentColorScheme.scoredItemsText
-        scoreNode.fontSize = LookAndFeel.fontScheme.defaultFontSize
+        scoreNode.fontSize = LookAndFeel.fontScheme.scoreFontSize
         scoreNode.fontName = LookAndFeel.fontScheme.scoreFontName
         scoringLayer.addChild(scoreNode)
         
@@ -340,7 +340,7 @@ class GameScene: SKScene {
                                            y: SCREEN_HEIGHT - BOUNDARY_OUTSET)
         itemsMissedNode.zPosition = CGFloat(ZPositions.foreground.rawValue)
         itemsMissedNode.fontColor = LookAndFeel.currentColorScheme.missedItemsText
-        itemsMissedNode.fontSize = LookAndFeel.fontScheme.defaultFontSize
+        itemsMissedNode.fontSize = LookAndFeel.fontScheme.scoreFontSize
         itemsMissedNode.fontName = LookAndFeel.fontScheme.scoreFontName
         scoringLayer.addChild(itemsMissedNode)
         
