@@ -10,7 +10,7 @@ import SpriteKit
 
 class InGameMenuScene: SKScene {
     var gcWranglerDelegate: GCWrangler?
-    var previousScene: GameScene?
+    var previousScene: GameScene!
     var gameOver: Bool = false
     let buttonLayer = SKNode()
     
@@ -48,9 +48,20 @@ class InGameMenuScene: SKScene {
         if !gameOver {
             buttonNameToFunction.insert(("Resume", resumePlaying), at: 0)
         }
+        
         let BUTTON_OFFSET = 100
         let TOTAL_OFFSET = BUTTON_OFFSET * (buttonNameToFunction.count - 1)
         let TOP_MOST_BUTTON_POSITION = self.frame.midY + CGFloat(TOTAL_OFFSET) * 0.5
+        
+        //add current score
+        let scoreNode = SKLabelNode(text: "\(previousScene.score)")
+        scoreNode.position = CGPoint(x: self.frame.midX,
+                                     y: TOP_MOST_BUTTON_POSITION + CGFloat(BUTTON_OFFSET))
+        scoreNode.zPosition = CGFloat(ZPositions.foreground.rawValue)
+        scoreNode.fontColor = LookAndFeel.currentColorScheme.scoredItemsText
+        scoreNode.fontSize = LookAndFeel.fontScheme.headingFontSize
+        scoreNode.fontName = LookAndFeel.fontScheme.headingFontName
+        buttonLayer.addChild(scoreNode)
         
         for (index, (name, function)) in buttonNameToFunction.enumerated() {
             let button = Button(label: name,

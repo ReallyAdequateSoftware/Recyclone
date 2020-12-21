@@ -34,12 +34,20 @@ struct ColorScheme {
 
 struct FontScheme {
     var defaultFontName: String = "HelveticaNeue-UltraLight"
-    var buttonFontName: String = "HelveticaNeue-UltraLight"
-    var headingFontName: String = "HelveticaNeue-UltraLightItalic"
-    var scoreFontName: String = "HelveticaNeue-Light"
     var defaultFontSize: CGFloat = 30
+
+    var buttonFontName: String = "HelveticaNeue-UltraLight"
     var buttonFontSize: CGFloat = 32
-    var headingTextSize: CGFloat = 40
+
+    var titleFontName: String = "HelveticaNeue-UltraLightItalic"
+    var titleTextSize: CGFloat = 40
+
+    var headingFontName: String = "PingFangSC-Regular"
+    var headingFontSize: CGFloat = 100
+    
+    var scoreFontName: String = "HelveticaNeue-Light"
+    var scoreFontSize: CGFloat = 30
+    
 }
 
 class AudioWrangler: NSObject, AVAudioPlayerDelegate {
