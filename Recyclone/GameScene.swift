@@ -10,44 +10,11 @@ import GameplayKit
 import MultipeerConnectivity
 import GameKit
 
-func +(left: CGPoint, right: CGPoint) -> CGPoint {
-    return CGPoint(x: left.x + right.x, y: left.y + right.y)
-}
-
-func -(left: CGPoint, right: CGPoint) -> CGPoint {
-    return CGPoint(x: left.x - right.x, y: left.y - right.y)
-}
-
-func *(point: CGPoint, scalar: CGFloat) -> CGPoint {
-    return CGPoint(x: point.x * scalar, y: point.y * scalar)
-}
-
-func /(point: CGPoint, scalar: CGFloat) -> CGPoint {
-    return CGPoint(x: point.x / scalar, y: point.y / scalar)
-}
-
 #if !(arch(x86_64) || arch(arm64))
 func sqrt(a: CGFloat) -> CGFloat {
     return CGFloat(sqrtf(Float(a)))
 }
 #endif
-
-enum ZPositions: CGFloat {
-    case background = -1
-    case item = 0
-    case behindForeground = 0.5
-    case foreground = 1
-}
-
-extension CGPoint {
-    func length() -> CGFloat {
-        return sqrt(x*x + y*y)
-    }
-    
-    func normalized() -> CGPoint {
-        return self / length()
-    }
-}
 
 //MARK: Remove items from screen
 extension GameScene: SKPhysicsContactDelegate{
