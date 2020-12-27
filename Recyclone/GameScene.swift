@@ -26,7 +26,7 @@ extension GameScene: SKPhysicsContactDelegate{
                 categoryBodyA == PhysicsCategory.boundary && categoryBodyB == PhysicsCategory.item {
             
             (categoryBodyA == PhysicsCategory.item ? contact.bodyA.node : contact.bodyB.node)?.removeFromParent()
-            LookAndFeel.gameplayFeedback.notificationOccurred(.warning)
+            HapticFeedbackScheme.gameplayFeedback.notificationOccurred(.warning)
             LookAndFeel.audioScheme.missed.play()
             itemsMissed += 1
             print("item removed")
@@ -81,7 +81,7 @@ class GameScene: SKScene {
     override init(size: CGSize) {
         super.init(size: size)
         
-        backgroundColor = LookAndFeel.currentColorScheme.gameBackground
+        backgroundColor = ColorScheme.currentColorClass.gameBackground
         loadItemTextures()
         
         //setup boundary removal physics for performance and game over mechanism
@@ -98,6 +98,7 @@ class GameScene: SKScene {
         initScoring()
         initPauseButton()
         
+        scoringLayer.zPosition = ZPositions.foreground.rawValue
         self.addChild(scoringLayer)
         self.addChild(itemLayer)
     }
@@ -118,7 +119,7 @@ class GameScene: SKScene {
     
     //MARK: Touch event handling
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        LookAndFeel.gameplayFeedback.prepare()
+        HapticFeedbackScheme.gameplayFeedback.prepare()
         for touch in touches{
             let location = touch.location(in: self)
             let touchedNodes = self.nodes(at: location)
@@ -158,7 +159,7 @@ class GameScene: SKScene {
                         let binNode = itemTypeToBin[texture.type]!
                         
                         if  binNode.intersects(previouslyTouched) { //check if the item was placed in the right bin
-                            LookAndFeel.buttonFeedback.impactOccurred()
+                            HapticFeedbackScheme.buttonFeedback.impactOccurred()
                             LookAndFeel.audioScheme.success.play()
                             score += 1
                             evaluateDifficulty()
@@ -293,36 +294,32 @@ class GameScene: SKScene {
     func initScoring() {
         
         //setup scoring
-        scoreNode.position = CGPoint(x: SCREEN_WIDTH * 0.25,
-                                     y: SCREEN_HEIGHT - BOUNDARY_OUTSET)
-        scoreNode.zPosition = CGFloat(ZPositions.foreground.rawValue)
-        scoreNode.text = "\(score)"
-        scoreNode.fontColor = LookAndFeel.currentColorScheme.scoredItemsText
-        scoreNode.fontSize = LookAndFeel.fontScheme.scoreFontSize
-        scoreNode.fontName = LookAndFeel.fontScheme.scoreFontName
+        scoreNode = LookAndFeel.textNode(text: "\(score)",
+                                         at: CGPoint(x: SCREEN_WIDTH * 0.25,
+                                                     y: SCREEN_HEIGHT - BOUNDARY_OUTSET),
+                                         as: FontScheme.score,
+                                         color: ColorScheme.currentColorClass.scoredItemsText)
         scoringLayer.addChild(scoreNode)
         
-        itemsMissedNode.text = "\(itemsMissed)"
-        itemsMissedNode.position = CGPoint(x: SCREEN_WIDTH * 0.75,
-                                           y: SCREEN_HEIGHT - BOUNDARY_OUTSET)
-        itemsMissedNode.zPosition = CGFloat(ZPositions.foreground.rawValue)
-        itemsMissedNode.fontColor = LookAndFeel.currentColorScheme.missedItemsText
-        itemsMissedNode.fontSize = LookAndFeel.fontScheme.scoreFontSize
-        itemsMissedNode.fontName = LookAndFeel.fontScheme.scoreFontName
+        itemsMissedNode = LookAndFeel.textNode(text: "\(itemsMissed)",
+                                               at: CGPoint(x: SCREEN_WIDTH * 0.75,
+                                                           y: SCREEN_HEIGHT - BOUNDARY_OUTSET),
+                                               as: FontScheme.score,
+                                               color: ColorScheme.currentColorClass.missedItemsText)
         scoringLayer.addChild(itemsMissedNode)
         
         //setup scoring bins
         compostBin = SKSpriteNode(imageNamed: "compost_bin")
         compostBin.position = CGPoint(x: compostBin.size.width * 0.75,
                                       y: compostBin.size.height)
-        compostBin.zPosition = CGFloat(ZPositions.background.rawValue)
+        compostBin.zPosition = ZPositions.background.rawValue
         itemTypeToBin.updateValue(compostBin, forKey: ItemType.compost)
         scoringLayer.addChild(compostBin)
         
         recycleBin = SKSpriteNode(imageNamed: "recycle_bin")
         recycleBin.position = CGPoint(x: SCREEN_WIDTH - recycleBin.size.width * 0.75,
                                       y: recycleBin.size.height)
-        recycleBin.zPosition = CGFloat(ZPositions.background.rawValue)
+        recycleBin.zPosition = ZPositions.background.rawValue
         itemTypeToBin.updateValue(recycleBin, forKey: ItemType.recycle)
         scoringLayer.addChild(recycleBin)
     }
@@ -331,11 +328,11 @@ class GameScene: SKScene {
     func initPauseButton() {
         //system images are vectors and spritekit cannot handle them, so we have to convert
         var pauseUnpress = UIImage(systemName: "pause.fill")!
-            .withTintColor(LookAndFeel.currentColorScheme.unpressedButton, renderingMode: .alwaysOriginal)
+            .withTintColor(ColorScheme.currentColorClass.unpressedButton, renderingMode: .alwaysOriginal)
         pauseUnpress = UIImage(data: pauseUnpress.pngData()!)!
         
         var pausePress = UIImage(systemName: "pause.fill")!
-            .withTintColor(LookAndFeel.currentColorScheme.pressedButton, renderingMode: .alwaysOriginal)
+            .withTintColor(ColorScheme.currentColorClass.pressedButton, renderingMode: .alwaysOriginal)
         pausePress = UIImage(data: pausePress.pngData()!)!
         
         //view.safeAreaInsets does not work for some reason

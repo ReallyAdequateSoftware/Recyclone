@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SpriteKit
 
 enum ZPositions: CGFloat {
     case background = -1

@@ -16,7 +16,7 @@ func sqrt(a: CGFloat) -> CGFloat {
 }
 #endif
 
-class ProgressiveProperty<Multipliable : Numeric> {
+class ProgressiveProperty<Multipliable : Numeric & FloatingPoint> {
     var value: Multipliable
     var multiplier: CGFloat
     
@@ -27,6 +27,10 @@ class ProgressiveProperty<Multipliable : Numeric> {
     
     func progressValue() {
         self.value *= multiplier as! Multipliable
+    }
+    
+    func regressValue() {
+        self.value /= multiplier as! Multipliable
     }
 }
 
@@ -56,11 +60,10 @@ extension ItemAdderScene: SKPhysicsContactDelegate{
 
 class ItemAdderScene: SKScene {
     
-    var appDelegate = UIApplication.shared.delegate as! AppDelegate
     var trashItemTextures = Set<ItemTexture>()
     var itemMovement = ItemMovement()
-    var itemDropCountdown = TimeInterval(1)
-    var lastTimeInterval = TimeInterval(0)
+    private var itemDropCountdown = TimeInterval(1)
+    private var lastTimeInterval = TimeInterval(0)
     let NUM_OF_RECYCLE_IMG = 4
     let NUM_OF_COMPOST_IMG = 4
     let SCREEN_WIDTH = UIScreen.main.bounds.size.width
@@ -73,7 +76,7 @@ class ItemAdderScene: SKScene {
     override init(size: CGSize) {
         super.init(size: size)
         
-        backgroundColor = LookAndFeel.currentColorScheme.gameBackground
+        backgroundColor = ColorScheme.currentColorClass.gameBackground
         loadItemTextures()
         
         //setup boundary removal physics for performance
@@ -170,6 +173,7 @@ class ItemAdderScene: SKScene {
             item.physicsBody?.velocity = CGVector(dx: 0,
                                                   dy: CGFloat(itemMovement.speed.value))
             
+            //move this to gamescene
             //increase touchable area for smaller items
             if item.size.height * item.size.width < 7000 {
                 let largestDimension = max(item.size.height, item.size.width)
