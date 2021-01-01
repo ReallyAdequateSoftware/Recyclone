@@ -285,6 +285,7 @@ class GameScene: ItemAdderScene {
     
     func unpauseGame() {
         super.shouldSpawnItems = true
+        gamePlayIsPaused = false
         super.physicsWorld.speed = 1.0
         for child in itemLayer.children {
             child.isPaused = false
