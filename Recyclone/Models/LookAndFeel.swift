@@ -86,35 +86,42 @@ class FontScheme {
 
     static var `default`: FontClass = FontClass(name: "HelveticaNeue-UltraLight", size: 30)
     static var button: FontClass = FontClass(name: "HelveticaNeue-UltraLight", size: 32)
-    static var title: FontClass = FontClass(name: "HelveticaNeue-UltraLightItalic", size: 40)
+    static var title: FontClass = FontClass(name: "HelveticaNeue-UltraLightItalic", size: 50)
     static var heading: FontClass = FontClass(name: "PingFangSC-Regular", size: 100)
 }
 
 class AudioWrangler: NSObject, AVAudioPlayerDelegate {
     let name: String
     let fileType: String
-    private var ready = Set<AVAudioPlayer>()
-    private var busy = Set<AVAudioPlayer>()
+    private var ready: Set<AVAudioPlayer>
+    private var busy: Set<AVAudioPlayer>
     
     init(with name: String, as fileType: String) {
         self.name = name
         self.fileType = fileType
+        self.ready = Set<AVAudioPlayer>()
+        self.busy = Set<AVAudioPlayer>()
+
         super.init()
         print("init")
         self.primeAudioPlayers()
+        self.primeAudioPlayers()
+        print("\(self.ready.count)")
     }
     
     func play() {
+        print("ready size \(self.ready.count)")
         if let player = ready.popFirst() {
             //need to keep a reference so that the player isnt deallocated while in the background thread
-            busy.insert(player)
-            primeAudioPlayers()
+            self.busy.insert(player)
             dispatchAudio(player: player)
+            primeAudioPlayers()
+
         }
     }
     
     private func primeAudioPlayers() {
-        if ready.isEmpty {
+        if ready.count < 2 {
             DispatchQueue.dispatchTask(to: .userInitiated,
                                        task: {
                                         if let player = AudioWrangler.createAudioPlayer(with: self.name, as: self.fileType) {
@@ -128,9 +135,10 @@ class AudioWrangler: NSObject, AVAudioPlayerDelegate {
     }
     
     private func dispatchAudio(player: AVAudioPlayer) {
-        DispatchQueue.dispatchTask( to: .userInitiated,
+        DispatchQueue.dispatchTask( to: .userInteractive,
                                     task: {
                                         player.play()
+                                        print("\(self.name) played")
                                     })
     }
     
@@ -154,7 +162,10 @@ class AudioWrangler: NSObject, AVAudioPlayerDelegate {
     }
     
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        self.ready.insert(player)
+        if flag {
+            self.ready.insert(player)
+            player.prepareToPlay()
+        }
     }
 }
 
@@ -183,7 +194,7 @@ class LookAndFeel {
 //        }
 //    })
     
-    static let audioScheme = AudioScheme()
+    static var audioScheme = AudioScheme()
     
     static func textNode(text: String, at position: CGPoint? = nil, as fontClass: FontScheme.FontClass = FontScheme.default, color: UIColor = ColorScheme.currentColorClass.defaultText) -> SKLabelNode {
         let label = SKLabelNode(text: text)

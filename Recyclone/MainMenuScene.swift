@@ -54,10 +54,7 @@ class MainMenuScene: ItemAdderScene {
         self.itemLayer.zPosition = ZPositions.background.rawValue
         self.itemMovement.speed.value = -150
         
-        //prevent lazy initialization of audio player
-        DispatchQueue.global().async {
-            LookAndFeel.audioScheme
-        }
+        
 
     }
     
@@ -121,7 +118,7 @@ class MainMenuScene: ItemAdderScene {
             //set physics
             item.physicsBody?.velocity = CGVector(dx: 0,
                                                   dy: CGFloat(itemMovement.speed.value))
-            item.alpha = 0.7
+            item.alpha = 0.65
             
             itemLayer.addChild(item)
             print("\(item.name ?? "nothing") added")

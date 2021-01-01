@@ -92,6 +92,7 @@ class Button: SKShapeNode {
         self.unpressed = SKShapeNode()
         self.label = SKLabelNode()
         self.action = nil
+        _ = LookAndFeel.audioScheme
         super.init()
     }
     

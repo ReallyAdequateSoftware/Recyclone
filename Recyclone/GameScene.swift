@@ -16,36 +16,11 @@ func sqrt(a: CGFloat) -> CGFloat {
 }
 #endif
 
-//MARK: Remove items from screen
-extension GameScene: SKPhysicsContactDelegate{
-    func didBegin(_ contact: SKPhysicsContact){
-        //remove the item if it contacted the boundary
-        let categoryBodyA = contact.bodyA.categoryBitMask
-        let categoryBodyB = contact.bodyB.categoryBitMask
-        if  categoryBodyA == PhysicsCategory.item && categoryBodyB == PhysicsCategory.boundary ||
-                categoryBodyA == PhysicsCategory.boundary && categoryBodyB == PhysicsCategory.item {
-            
-            (categoryBodyA == PhysicsCategory.item ? contact.bodyA.node : contact.bodyB.node)?.removeFromParent()
-            HapticFeedbackScheme.gameplayFeedback.notificationOccurred(.warning)
-            LookAndFeel.audioScheme.missed.play()
-            itemsMissed += 1
-            print("item removed")
-        }
-    }
-}
 
-
-class GameScene: SKScene {
+class GameScene: ItemAdderScene {
     
     var gcWranglerDelegate: GCWrangler?
     var appDelegate = UIApplication.shared.delegate as! AppDelegate
-    var trashItemTextures = Set<ItemTexture>()
-    var itemSpeed = Float(200)
-    let ITEM_SPEED_MULTI = Float(1.1);
-    var itemDropCountdown = TimeInterval(1)
-    var itemDropInterval = TimeInterval(1)
-    let ITEM_INTERVAL_MULTI = Double(0.85)
-    var lastTimeInterval = TimeInterval(0)
     var itemsMissed = 0 {
         didSet{
             itemsMissedNode.text = "\(itemsMissed)"
@@ -58,21 +33,14 @@ class GameScene: SKScene {
     }
     var scoreNode = SKLabelNode()
     var itemsMissedNode = SKLabelNode()
-    let NUM_OF_RECYCLE_IMG = 4
-    let NUM_OF_COMPOST_IMG = 4
-    let SCREEN_WIDTH = UIScreen.main.bounds.size.width
-    let SCREEN_HEIGHT = UIScreen.main.bounds.size.height
     var compostBin = SKSpriteNode()
     var recycleBin = SKSpriteNode()
-    let BOUNDARY_OUTSET = CGFloat(100)
     var itemTypeToBin = [ItemType : SKNode]()
     var retryButton: Button?
     var mainMenuButton: Button?
-    var gamePlayIsPaused = false
     var gameOver = false
-    
+    var gamePlayIsPaused = false
     let scoringLayer = SKNode()
-    let itemLayer = SKNode()
     
     //map for associating individual touches with items
     private var touchToNode = [UITouch: SKNode]()
@@ -98,13 +66,32 @@ class GameScene: SKScene {
         initScoring()
         initPauseButton()
         
-        scoringLayer.zPosition = ZPositions.foreground.rawValue
         self.addChild(scoringLayer)
-        self.addChild(itemLayer)
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    //MARK: ItemAdderScene overrides
+    
+    override func itemDidContactBoundary() {
+        HapticFeedbackScheme.gameplayFeedback.notificationOccurred(.warning)
+        LookAndFeel.audioScheme.missed.play()
+        itemsMissed += 1
+    }
+    
+    override func addItem() {
+        var item = super.createRandomItem()
+        //increase touchable area for smaller items
+        if item.size.height * item.size.width < 7000 {
+            let largestDimension = max(item.size.height, item.size.width)
+            let touchArea = SKShapeNode(circleOfRadius: largestDimension / 2)
+            touchArea.alpha = 0.0
+            item.addChild(touchArea)
+        }
+        itemLayer.addChild(item)
+        print("\(item.name ?? "nothing") added")
     }
     
     /*
@@ -166,7 +153,7 @@ class GameScene: SKScene {
                             previouslyTouched.removeFromParent()
                         } else {    //reset the movement of the node if it wasn't removed
                             previouslyTouched.physicsBody?.velocity = CGVector(dx: 0,
-                                                                               dy: CGFloat(-itemSpeed))
+                                                                               dy: super.itemMovement.speed.value)
                         }
                         self.touchToNode[touch]?.isPaused = false
                         self.touchToNode[touch]?.physicsBody?.isResting = false
@@ -189,7 +176,7 @@ class GameScene: SKScene {
         print("game scene denitialized")
     }
     
-    func cleanUp() {
+    override func cleanUp() {
         for child in self.children {
             print("clearing \(child)")
             child.removeAllActions()
@@ -203,23 +190,10 @@ class GameScene: SKScene {
         self.itemsMissed = 0
     }
     
-    //MARK: Spawn items clock
-    override func update(_ currentTime: TimeInterval) {
-        // Called before each frame is rendered
-        let delta = currentTime - self.lastTimeInterval
-        self.lastTimeInterval = currentTime
-        self.itemDropCountdown -= delta
-        
-        if (self.itemDropCountdown <= 0 && !gamePlayIsPaused) {
-            addItem()
-            self.itemDropCountdown = self.itemDropInterval
-        }
-    }
-    
     //MARK: Check endgame conditions
     override func didSimulatePhysics() {
         //only check endgame when physics changes -> contacts are made
-        if(self.itemsMissed >= 10 && !gamePlayIsPaused){
+        if(self.itemsMissed >= 10 && shouldSpawnItems){
             gameOver = true
             pauseGame()
             submitScore()
@@ -240,51 +214,12 @@ class GameScene: SKScene {
             }
         }
     }
-    /*
-     random number generation
-     */
-    func random() -> CGFloat{
-        return CGFloat(Float(arc4random()) / Float(0xFFFFFFFF))
-    }
-    
-    func random(min: CGFloat, max:CGFloat) -> CGFloat{
-        return random() * (max-min) + min
-    }
-    
+
     //MARK: Difficulty calculation
     func evaluateDifficulty() {
         if score % 10 == 0 {
-            itemDropInterval *= ITEM_INTERVAL_MULTI
-            itemSpeed *= ITEM_SPEED_MULTI
-        }
-    }
-    
-    /*
-     add an item of trash onto the screen
-     */
-    func addItem(){
-        //create a new item with a random texture
-        if let randomItemTexture = trashItemTextures.randomElement(){
-            let item = Item(itemTexture: randomItemTexture)
-            item.name = randomItemTexture.type.rawValue
-            item.position = CGPoint(x: random(min: item.size.width,
-                                              max: SCREEN_WIDTH - item.size.width),
-                                    y: SCREEN_HEIGHT + item.size.height)
-            item.zPosition = CGFloat(ZPositions.item.rawValue)
-            //set physics
-            item.physicsBody?.velocity = CGVector(dx: 0,
-                                                  dy: CGFloat(-itemSpeed))
-            
-            //increase touchable area for smaller items
-            if item.size.height * item.size.width < 7000 {
-                let largestDimension = max(item.size.height, item.size.width)
-                let touchArea = SKShapeNode(circleOfRadius: largestDimension / 2)
-                touchArea.alpha = 0.0
-                item.addChild(touchArea)
-            }
-            
-            itemLayer.addChild(item)
-            print("\(item.name ?? "nothing") added")
+            //super.itemMovement.spawnInterval.progressValue()
+            super.itemMovement.speed.progressValue()
         }
     }
     
@@ -299,6 +234,7 @@ class GameScene: SKScene {
                                                      y: SCREEN_HEIGHT - BOUNDARY_OUTSET),
                                          as: FontScheme.score,
                                          color: ColorScheme.currentColorClass.scoredItemsText)
+        scoreNode.zPosition = ZPositions.foreground.rawValue
         scoringLayer.addChild(scoreNode)
         
         itemsMissedNode = LookAndFeel.textNode(text: "\(itemsMissed)",
@@ -306,6 +242,7 @@ class GameScene: SKScene {
                                                            y: SCREEN_HEIGHT - BOUNDARY_OUTSET),
                                                as: FontScheme.score,
                                                color: ColorScheme.currentColorClass.missedItemsText)
+        itemsMissedNode.zPosition = ZPositions.foreground.rawValue
         scoringLayer.addChild(itemsMissedNode)
         
         //setup scoring bins
@@ -347,15 +284,16 @@ class GameScene: SKScene {
     }
     
     func unpauseGame() {
-        gamePlayIsPaused = false
-        physicsWorld.speed = 1.0
+        super.shouldSpawnItems = true
+        super.physicsWorld.speed = 1.0
         for child in itemLayer.children {
             child.isPaused = false
         }
     }
     
     func pauseGame() {
-        gamePlayIsPaused = true
+        super.shouldSpawnItems = false
+        self.gamePlayIsPaused = true
         physicsWorld.speed = 0
         for child in itemLayer.children {
             child.isPaused = true
@@ -409,18 +347,6 @@ class GameScene: SKScene {
         
         let cgImage = context.createCGImage(result ?? CIImage(), from: inputImage.extent)
         return UIImage(cgImage: cgImage!, scale: sourceImage.scale * 0.98, orientation: sourceImage.imageOrientation)
-    }
-    
-    func loadItemTextures() {
-        //initialize trash item textures
-        for i in 0..<NUM_OF_COMPOST_IMG{
-            trashItemTextures.insert( ItemTexture(texture: SKTexture(imageNamed: "compost/compost\(i)"),
-                                                  type: ItemType.compost))
-        }
-        for i in 0..<NUM_OF_RECYCLE_IMG{
-            trashItemTextures.insert( ItemTexture(texture: SKTexture(imageNamed: "recycle/recycle\(i)"),
-                                                  type: ItemType.recycle))
-        }
     }
     
 }

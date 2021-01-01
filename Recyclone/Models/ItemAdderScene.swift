@@ -16,27 +16,36 @@ func sqrt(a: CGFloat) -> CGFloat {
 }
 #endif
 
-class ProgressiveProperty<Multipliable : Numeric & FloatingPoint> {
-    var value: Multipliable
+class ProgressiveProperty {
+    var value: CGFloat
     var multiplier: CGFloat
     
-    init(value: Multipliable, multiplier: CGFloat) {
+    init(value: CGFloat, multiplier: CGFloat) {
         self.value = value
         self.multiplier = multiplier
     }
     
     func progressValue() {
-        self.value *= multiplier as! Multipliable
+        self.value *= self.multiplier
     }
     
     func regressValue() {
-        self.value /= multiplier as! Multipliable
+        self.value /= self.multiplier
     }
 }
 
+typealias CGTimeInterval = CGFloat
+func +(left: TimeInterval, right: CGTimeInterval) -> CGTimeInterval {
+    return CGTimeInterval(left) + CGTimeInterval(right)
+}
+
+func -(left: TimeInterval, right: CGTimeInterval) -> CGTimeInterval {
+    return CGTimeInterval(left) - CGTimeInterval(right)
+}
+
 struct ItemMovement {
-    var speed:         ProgressiveProperty<CGFloat>      = ProgressiveProperty(value: -200, multiplier: 1.1)
-    var spawnInterval: ProgressiveProperty<TimeInterval> = ProgressiveProperty(value: TimeInterval(1), multiplier:  0.85)
+    var speed:         ProgressiveProperty      = ProgressiveProperty(value: -200, multiplier: 1.1)
+    var spawnInterval: ProgressiveProperty = ProgressiveProperty(value: CGTimeInterval(1), multiplier:  0.85)
 }
 
 //MARK: Remove items from screen
@@ -49,21 +58,20 @@ extension ItemAdderScene: SKPhysicsContactDelegate{
                 categoryBodyA == PhysicsCategory.boundary && categoryBodyB == PhysicsCategory.item {
             
             (categoryBodyA == PhysicsCategory.item ? contact.bodyA.node : contact.bodyB.node)?.removeFromParent()
-            //move this to game scene only
-            //LookAndFeel.gameplayFeedback.notificationOccurred(.warning)
-            //LookAndFeel.audioScheme.missed.play()
-            //itemsMissed += 1
+            itemDidContactBoundary()
             print("item removed")
         }
     }
+    
+    
 }
 
 class ItemAdderScene: SKScene {
     
     var trashItemTextures = Set<ItemTexture>()
     var itemMovement = ItemMovement()
-    private var itemDropCountdown = TimeInterval(1)
-    private var lastTimeInterval = TimeInterval(0)
+    private var itemDropCountdown = CGTimeInterval(1)
+    private var lastTimeInterval = CGTimeInterval(0)
     let NUM_OF_RECYCLE_IMG = 4
     let NUM_OF_COMPOST_IMG = 4
     let SCREEN_WIDTH = UIScreen.main.bounds.size.width
@@ -91,10 +99,21 @@ class ItemAdderScene: SKScene {
         self.physicsBody?.categoryBitMask = PhysicsCategory.boundary
         
         self.addChild(itemLayer)
+        //prevent lazy initialization of audio player
+        //TODO: figure out why this is working as expected -> everything inits properly but
+        // audio doesnt play if there is a long period of time between an audio being played
+        // maybe its being init but is not allocated/deallocated
+        DispatchQueue.global().async {
+            _ = LookAndFeel.audioScheme
+        }
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    func itemDidContactBoundary() {
+        
     }
     
     override func didMove(to view: SKView) {
@@ -137,7 +156,7 @@ class ItemAdderScene: SKScene {
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
         let delta = currentTime - self.lastTimeInterval
-        self.lastTimeInterval = currentTime
+        self.lastTimeInterval = CGTimeInterval(currentTime)
         self.itemDropCountdown -= delta
         
         if (self.itemDropCountdown <= 0 && shouldSpawnItems) {
@@ -161,9 +180,15 @@ class ItemAdderScene: SKScene {
      add an item of trash onto the screen
      */
     func addItem(){
+        let item = createRandomItem()
+        itemLayer.addChild(item)
+    }
+    
+    func createRandomItem() -> Item {
         //create a new item with a random texture
-        if let randomItemTexture = trashItemTextures.randomElement(){
-            let item = Item(itemTexture: randomItemTexture)
+        var item = Item()
+        if let randomItemTexture = trashItemTextures.randomElement() {
+            item = Item(itemTexture: randomItemTexture)
             item.name = randomItemTexture.type.rawValue
             item.position = CGPoint(x: random(min: item.size.width,
                                               max: SCREEN_WIDTH - item.size.width),
@@ -172,19 +197,8 @@ class ItemAdderScene: SKScene {
             //set physics
             item.physicsBody?.velocity = CGVector(dx: 0,
                                                   dy: CGFloat(itemMovement.speed.value))
-            
-            //move this to gamescene
-            //increase touchable area for smaller items
-            if item.size.height * item.size.width < 7000 {
-                let largestDimension = max(item.size.height, item.size.width)
-                let touchArea = SKShapeNode(circleOfRadius: largestDimension / 2)
-                touchArea.alpha = 0.0
-                item.addChild(touchArea)
-            }
-            
-            itemLayer.addChild(item)
-            print("\(item.name ?? "nothing") added")
         }
+        return item
     }
     
     func loadItemTextures() {
