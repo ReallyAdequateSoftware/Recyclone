@@ -202,14 +202,19 @@ class GameScene: ItemAdderScene {
     
     
     func submitScore() {
+        submitScore(to: "com.Recyclone.highscore")
+        submitScore(to: "com.Recyclone.highscore.weekly")
+    }
+    
+    func submitScore(to leaderboardId: String) {
         if (GKLocalPlayer.local.isAuthenticated) {
-            let gkScore = GKScore(leaderboardIdentifier: "com.highscore.Recyclone")
+            let gkScore = GKScore(leaderboardIdentifier: leaderboardId)
             gkScore.value = Int64(score)
             GKScore.report([gkScore]) { (error) in
                 if error != nil {
                     print(error!.localizedDescription)
                 } else {
-                    print("High Score submitted to the leaderboard!")
+                    print("High Score submitted to the leaderboard \(leaderboardId)")
                 }
             }
         }
