@@ -32,6 +32,15 @@
 		16773EBE2588228B00585823 /* InGameMenuScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16773EBD2588228B00585823 /* InGameMenuScene.swift */; };
 		16773EBF2588228B00585823 /* InGameMenuScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16773EBD2588228B00585823 /* InGameMenuScene.swift */; };
 		16773EC02588228B00585823 /* InGameMenuScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16773EBD2588228B00585823 /* InGameMenuScene.swift */; };
+		167FBFDE25967FB500069342 /* ItemAdderScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 167FBFDD25967FB500069342 /* ItemAdderScene.swift */; };
+		167FBFDF25967FB500069342 /* ItemAdderScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 167FBFDD25967FB500069342 /* ItemAdderScene.swift */; };
+		167FBFE025967FB500069342 /* ItemAdderScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 167FBFDD25967FB500069342 /* ItemAdderScene.swift */; };
+		167FBFE5259681E300069342 /* ZPositions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 167FBFE4259681E300069342 /* ZPositions.swift */; };
+		167FBFE6259681E300069342 /* ZPositions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 167FBFE4259681E300069342 /* ZPositions.swift */; };
+		167FBFE7259681E300069342 /* ZPositions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 167FBFE4259681E300069342 /* ZPositions.swift */; };
+		167FBFEF2597E00200069342 /* LookAndFeel+Recyclone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 167FBFEE2597E00200069342 /* LookAndFeel+Recyclone.swift */; };
+		167FBFF02597E00200069342 /* LookAndFeel+Recyclone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 167FBFEE2597E00200069342 /* LookAndFeel+Recyclone.swift */; };
+		167FBFF12597E00200069342 /* LookAndFeel+Recyclone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 167FBFEE2597E00200069342 /* LookAndFeel+Recyclone.swift */; };
 		1695087D256DCC450035E2D5 /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1695087C256DCC450035E2D5 /* Button.swift */; };
 		1695087E256DCC450035E2D5 /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1695087C256DCC450035E2D5 /* Button.swift */; };
 		1695087F256DCC450035E2D5 /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1695087C256DCC450035E2D5 /* Button.swift */; };
@@ -84,6 +93,9 @@
 		166684BD25227DB100BBC221 /* RecycloneUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecycloneUITests.swift; sourceTree = "<group>"; };
 		166684BF25227DB100BBC221 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		16773EBD2588228B00585823 /* InGameMenuScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InGameMenuScene.swift; sourceTree = "<group>"; };
+		167FBFDD25967FB500069342 /* ItemAdderScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemAdderScene.swift; sourceTree = "<group>"; };
+		167FBFE4259681E300069342 /* ZPositions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ZPositions.swift; path = Recyclone/ZPositions.swift; sourceTree = SOURCE_ROOT; };
+		167FBFEE2597E00200069342 /* LookAndFeel+Recyclone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LookAndFeel+Recyclone.swift"; sourceTree = "<group>"; };
 		1695087C256DCC450035E2D5 /* Button.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Button.swift; sourceTree = "<group>"; };
 		16A34A33256DAE2200EB6645 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
 		16D90776258AED22002D0629 /* missed.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = missed.wav; sourceTree = "<group>"; };
@@ -179,7 +191,10 @@
 		16950883256DCC680035E2D5 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				167FBFE4259681E300069342 /* ZPositions.swift */,
+				167FBFDD25967FB500069342 /* ItemAdderScene.swift */,
 				16F443DA25895EC60076CEEA /* LookAndFeel.swift */,
+				167FBFEE2597E00200069342 /* LookAndFeel+Recyclone.swift */,
 				1695087C256DCC450035E2D5 /* Button.swift */,
 				16407D2A2564CE6F000CF628 /* MultipeerWrangler.swift */,
 				164E16DF256F25250030E3F1 /* Item.swift */,
@@ -345,13 +360,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				167FBFDE25967FB500069342 /* ItemAdderScene.swift in Sources */,
 				166684A125227DAF00BBC221 /* GameScene.swift in Sources */,
 				164E16F0256F26910030E3F1 /* PhysicsCategory.swift in Sources */,
 				16773EBE2588228B00585823 /* InGameMenuScene.swift in Sources */,
 				1695087D256DCC450035E2D5 /* Button.swift in Sources */,
 				166684A325227DAF00BBC221 /* GameViewController.swift in Sources */,
 				0F7F1E53253F775D003D6DA6 /* MainMenuScene.swift in Sources */,
+				167FBFE5259681E300069342 /* ZPositions.swift in Sources */,
 				164E16E0256F25250030E3F1 /* Item.swift in Sources */,
+				167FBFEF2597E00200069342 /* LookAndFeel+Recyclone.swift in Sources */,
 				16F443DB25895EC60076CEEA /* LookAndFeel.swift in Sources */,
 				16407D2B2564CE6F000CF628 /* MultipeerWrangler.swift in Sources */,
 				1650D166258C38E0003A628F /* Extensions.swift in Sources */,
@@ -363,13 +381,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				167FBFDF25967FB500069342 /* ItemAdderScene.swift in Sources */,
 				16773EBF2588228B00585823 /* InGameMenuScene.swift in Sources */,
 				164E16E5256F25370030E3F1 /* Item.swift in Sources */,
 				16407D2C2564CE6F000CF628 /* MultipeerWrangler.swift in Sources */,
 				1695087E256DCC450035E2D5 /* Button.swift in Sources */,
+				167FBFF02597E00200069342 /* LookAndFeel+Recyclone.swift in Sources */,
 				166684B325227DB100BBC221 /* RecycloneTests.swift in Sources */,
 				16F443DC25895EC60076CEEA /* LookAndFeel.swift in Sources */,
 				1650D167258C38E0003A628F /* Extensions.swift in Sources */,
+				167FBFE6259681E300069342 /* ZPositions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -379,8 +400,11 @@
 			files = (
 				16773EC02588228B00585823 /* InGameMenuScene.swift in Sources */,
 				164E16E4256F25370030E3F1 /* Item.swift in Sources */,
+				167FBFF12597E00200069342 /* LookAndFeel+Recyclone.swift in Sources */,
 				16407D2D2564CE6F000CF628 /* MultipeerWrangler.swift in Sources */,
+				167FBFE025967FB500069342 /* ItemAdderScene.swift in Sources */,
 				1695087F256DCC450035E2D5 /* Button.swift in Sources */,
+				167FBFE7259681E300069342 /* ZPositions.swift in Sources */,
 				166684BE25227DB100BBC221 /* RecycloneUITests.swift in Sources */,
 				16F443DD25895EC60076CEEA /* LookAndFeel.swift in Sources */,
 			);

@@ -16,7 +16,7 @@ protocol GCWrangler {
     func showLeaderboard()
 }
 
-class MainMenuScene: SKScene {
+class MainMenuScene: ItemAdderScene {
     
     var appDelegate = UIApplication.shared.delegate as! AppDelegate
     var startButton: Button!
@@ -28,14 +28,14 @@ class MainMenuScene: SKScene {
     override init(size: CGSize) {
         super.init(size: size)
         
-        self.backgroundColor = LookAndFeel.currentColorScheme.menuBackground
+        self.backgroundColor = ColorScheme.currentColorClass.menuBackground
         
-        let label = SKLabelNode(text: "Recyclone")
-        label.fontName = LookAndFeel.fontScheme.titleFontName
-        label.fontSize = LookAndFeel.fontScheme.titleTextSize
-        label.fontColor = LookAndFeel.currentColorScheme.defaultText
-        label.position = CGPoint(x: self.frame.midX, y: self.frame.midY + 200)
-        addChild(label)
+        let title = LookAndFeel.textNode(text: "Recyclone",
+                                         at: CGPoint(x: self.frame.midX,
+                                                     y: self.frame.midY + 200),
+                                         as: FontScheme.title,
+                                         color: ColorScheme.currentColorClass.defaultText)
+        addChild(title)
         
         let buttonNameToFunction = [("Start", startGame),
                                     ("Start Multipeer", startMultipeer),
@@ -51,9 +51,10 @@ class MainMenuScene: SKScene {
             self.addChild(button)
         }
         
-        DispatchQueue.global().async {
-            LookAndFeel.audioScheme
-        }
+        self.itemLayer.zPosition = ZPositions.background.rawValue
+        self.itemMovement.speed.value = -150
+        
+        
 
     }
     
@@ -96,7 +97,7 @@ class MainMenuScene: SKScene {
         print("main menu deinitialized")
     }
     
-    func cleanUp() {
+    override func cleanUp() {
         for child in self.children {
             print("clearing \(child)")
             child.removeAllActions()
@@ -104,6 +105,24 @@ class MainMenuScene: SKScene {
             child.removeFromParent()
         }
         self.gcWranglerDelegate = nil
+    }
+    
+    override func addItem(){
+        //create a new item with a random texture
+        if let randomItemTexture = trashItemTextures.randomElement(){
+            let item = Item(itemTexture: randomItemTexture)
+            item.name = randomItemTexture.type.rawValue
+            item.position = CGPoint(x: random(min: item.size.width,
+                                              max: SCREEN_WIDTH - item.size.width),
+                                    y: SCREEN_HEIGHT + item.size.height)
+            //set physics
+            item.physicsBody?.velocity = CGVector(dx: 0,
+                                                  dy: CGFloat(itemMovement.speed.value))
+            item.alpha = 0.65
+            
+            itemLayer.addChild(item)
+            print("\(item.name ?? "nothing") added")
+        }
     }
     
     required init(coder aDecoder: NSCoder) {

@@ -35,17 +35,15 @@ class Button: SKShapeNode {
     
     convenience init(label: String,
                      location: CGPoint,
-                     unpressedColor: UIColor = LookAndFeel.currentColorScheme.unpressedButton,
-                     pressedColor: UIColor = LookAndFeel.currentColorScheme.pressedButton,
-                     textColor: UIColor = LookAndFeel.currentColorScheme.buttonText,
+                     unpressedColor: UIColor = ColorScheme.currentColorClass.unpressedButton,
+                     pressedColor: UIColor = ColorScheme.currentColorClass.pressedButton,
+                     textColor: UIColor = ColorScheme.currentColorClass.buttonText,
                      function: (() -> Void)? = nil) {
         
         //MARK init node for the label
-        let labelNode = SKLabelNode(text: label)
-        labelNode.fontName = LookAndFeel.fontScheme.buttonFontName
-        labelNode.fontSize = LookAndFeel.fontScheme.buttonFontSize
-        labelNode.fontColor = textColor
-        labelNode.name = label
+        let labelNode = LookAndFeel.textNode(text: label,
+                                             as: FontScheme.button,
+                                             color: textColor)
         labelNode.horizontalAlignmentMode = .center
         labelNode.verticalAlignmentMode = .center
         labelNode.zPosition = ZPositions.foreground.rawValue
@@ -82,7 +80,7 @@ class Button: SKShapeNode {
         (self.unpressed as! SKShapeNode).fillColor = unpressedColor
         (self.unpressed as! SKShapeNode).strokeColor = unpressedColor
         self.unpressed.name = label
-        self.unpressed.zPosition = ZPositions.background.rawValue
+        self.unpressed.zPosition = ZPositions.behindForeground.rawValue
         
         addChild(self.label!)
         addChild(self.unpressed)
@@ -94,18 +92,19 @@ class Button: SKShapeNode {
         self.unpressed = SKShapeNode()
         self.label = SKLabelNode()
         self.action = nil
+        _ = LookAndFeel.audioScheme
         super.init()
     }
     
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        LookAndFeel.buttonFeedback.impactOccurred()
+        HapticFeedbackScheme.buttonFeedback.impactOccurred()
         LookAndFeel.audioScheme.buttonPress.play()
         self.pressed.isHidden = false
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        LookAndFeel.buttonFeedback.impactOccurred()
+        HapticFeedbackScheme.buttonFeedback.impactOccurred()
         LookAndFeel.audioScheme.buttonRelease.play()
         
         if self.action != nil{

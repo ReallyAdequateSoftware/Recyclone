@@ -58,9 +58,9 @@ class InGameMenuScene: SKScene {
         scoreNode.position = CGPoint(x: self.frame.midX,
                                      y: TOP_MOST_BUTTON_POSITION + CGFloat(BUTTON_OFFSET))
         scoreNode.zPosition = CGFloat(ZPositions.foreground.rawValue)
-        scoreNode.fontColor = LookAndFeel.currentColorScheme.scoredItemsText
-        scoreNode.fontSize = LookAndFeel.fontScheme.headingFontSize
-        scoreNode.fontName = LookAndFeel.fontScheme.headingFontName
+        scoreNode.fontColor = ColorScheme.currentColorClass.scoredItemsText
+        scoreNode.fontSize = FontScheme.heading.size
+        scoreNode.fontName = FontScheme.heading.name
         buttonLayer.addChild(scoreNode)
         
         for (index, (name, function)) in buttonNameToFunction.enumerated() {

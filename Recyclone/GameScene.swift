@@ -10,75 +10,17 @@ import GameplayKit
 import MultipeerConnectivity
 import GameKit
 
-func +(left: CGPoint, right: CGPoint) -> CGPoint {
-    return CGPoint(x: left.x + right.x, y: left.y + right.y)
-}
-
-func -(left: CGPoint, right: CGPoint) -> CGPoint {
-    return CGPoint(x: left.x - right.x, y: left.y - right.y)
-}
-
-func *(point: CGPoint, scalar: CGFloat) -> CGPoint {
-    return CGPoint(x: point.x * scalar, y: point.y * scalar)
-}
-
-func /(point: CGPoint, scalar: CGFloat) -> CGPoint {
-    return CGPoint(x: point.x / scalar, y: point.y / scalar)
-}
-
 #if !(arch(x86_64) || arch(arm64))
 func sqrt(a: CGFloat) -> CGFloat {
     return CGFloat(sqrtf(Float(a)))
 }
 #endif
 
-enum ZPositions: CGFloat {
-    case background = -1
-    case item = 0
-    case behindForeground = 0.5
-    case foreground = 1
-}
 
-extension CGPoint {
-    func length() -> CGFloat {
-        return sqrt(x*x + y*y)
-    }
-    
-    func normalized() -> CGPoint {
-        return self / length()
-    }
-}
-
-//MARK: Remove items from screen
-extension GameScene: SKPhysicsContactDelegate{
-    func didBegin(_ contact: SKPhysicsContact){
-        //remove the item if it contacted the boundary
-        let categoryBodyA = contact.bodyA.categoryBitMask
-        let categoryBodyB = contact.bodyB.categoryBitMask
-        if  categoryBodyA == PhysicsCategory.item && categoryBodyB == PhysicsCategory.boundary ||
-                categoryBodyA == PhysicsCategory.boundary && categoryBodyB == PhysicsCategory.item {
-            
-            (categoryBodyA == PhysicsCategory.item ? contact.bodyA.node : contact.bodyB.node)?.removeFromParent()
-            LookAndFeel.gameplayFeedback.notificationOccurred(.warning)
-            LookAndFeel.audioScheme.missed.play()
-            itemsMissed += 1
-            print("item removed")
-        }
-    }
-}
-
-
-class GameScene: SKScene {
+class GameScene: ItemAdderScene {
     
     var gcWranglerDelegate: GCWrangler?
     var appDelegate = UIApplication.shared.delegate as! AppDelegate
-    var trashItemTextures = Set<ItemTexture>()
-    var itemSpeed = Float(200)
-    let ITEM_SPEED_MULTI = Float(1.1);
-    var itemDropCountdown = TimeInterval(1)
-    var itemDropInterval = TimeInterval(1)
-    let ITEM_INTERVAL_MULTI = Double(0.85)
-    var lastTimeInterval = TimeInterval(0)
     var itemsMissed = 0 {
         didSet{
             itemsMissedNode.text = "\(itemsMissed)"
@@ -91,21 +33,14 @@ class GameScene: SKScene {
     }
     var scoreNode = SKLabelNode()
     var itemsMissedNode = SKLabelNode()
-    let NUM_OF_RECYCLE_IMG = 4
-    let NUM_OF_COMPOST_IMG = 4
-    let SCREEN_WIDTH = UIScreen.main.bounds.size.width
-    let SCREEN_HEIGHT = UIScreen.main.bounds.size.height
     var compostBin = SKSpriteNode()
     var recycleBin = SKSpriteNode()
-    let BOUNDARY_OUTSET = CGFloat(100)
     var itemTypeToBin = [ItemType : SKNode]()
     var retryButton: Button?
     var mainMenuButton: Button?
-    var gamePlayIsPaused = false
     var gameOver = false
-    
+    var gamePlayIsPaused = false
     let scoringLayer = SKNode()
-    let itemLayer = SKNode()
     
     //map for associating individual touches with items
     private var touchToNode = [UITouch: SKNode]()
@@ -114,7 +49,7 @@ class GameScene: SKScene {
     override init(size: CGSize) {
         super.init(size: size)
         
-        backgroundColor = LookAndFeel.currentColorScheme.gameBackground
+        backgroundColor = ColorScheme.currentColorClass.gameBackground
         loadItemTextures()
         
         //setup boundary removal physics for performance and game over mechanism
@@ -132,11 +67,31 @@ class GameScene: SKScene {
         initPauseButton()
         
         self.addChild(scoringLayer)
-        self.addChild(itemLayer)
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    //MARK: ItemAdderScene overrides
+    
+    override func itemDidContactBoundary() {
+        HapticFeedbackScheme.gameplayFeedback.notificationOccurred(.warning)
+        LookAndFeel.audioScheme.missed.play()
+        itemsMissed += 1
+    }
+    
+    override func addItem() {
+        var item = super.createRandomItem()
+        //increase touchable area for smaller items
+        if item.size.height * item.size.width < 7000 {
+            let largestDimension = max(item.size.height, item.size.width)
+            let touchArea = SKShapeNode(circleOfRadius: largestDimension / 2)
+            touchArea.alpha = 0.0
+            item.addChild(touchArea)
+        }
+        itemLayer.addChild(item)
+        print("\(item.name ?? "nothing") added")
     }
     
     /*
@@ -151,7 +106,7 @@ class GameScene: SKScene {
     
     //MARK: Touch event handling
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        LookAndFeel.gameplayFeedback.prepare()
+        HapticFeedbackScheme.gameplayFeedback.prepare()
         for touch in touches{
             let location = touch.location(in: self)
             let touchedNodes = self.nodes(at: location)
@@ -191,14 +146,14 @@ class GameScene: SKScene {
                         let binNode = itemTypeToBin[texture.type]!
                         
                         if  binNode.intersects(previouslyTouched) { //check if the item was placed in the right bin
-                            LookAndFeel.buttonFeedback.impactOccurred()
+                            HapticFeedbackScheme.buttonFeedback.impactOccurred()
                             LookAndFeel.audioScheme.success.play()
                             score += 1
                             evaluateDifficulty()
                             previouslyTouched.removeFromParent()
                         } else {    //reset the movement of the node if it wasn't removed
                             previouslyTouched.physicsBody?.velocity = CGVector(dx: 0,
-                                                                               dy: CGFloat(-itemSpeed))
+                                                                               dy: super.itemMovement.speed.value)
                         }
                         self.touchToNode[touch]?.isPaused = false
                         self.touchToNode[touch]?.physicsBody?.isResting = false
@@ -221,7 +176,7 @@ class GameScene: SKScene {
         print("game scene denitialized")
     }
     
-    func cleanUp() {
+    override func cleanUp() {
         for child in self.children {
             print("clearing \(child)")
             child.removeAllActions()
@@ -235,23 +190,10 @@ class GameScene: SKScene {
         self.itemsMissed = 0
     }
     
-    //MARK: Spawn items clock
-    override func update(_ currentTime: TimeInterval) {
-        // Called before each frame is rendered
-        let delta = currentTime - self.lastTimeInterval
-        self.lastTimeInterval = currentTime
-        self.itemDropCountdown -= delta
-        
-        if (self.itemDropCountdown <= 0 && !gamePlayIsPaused) {
-            addItem()
-            self.itemDropCountdown = self.itemDropInterval
-        }
-    }
-    
     //MARK: Check endgame conditions
     override func didSimulatePhysics() {
         //only check endgame when physics changes -> contacts are made
-        if(self.itemsMissed >= 10 && !gamePlayIsPaused){
+        if(self.itemsMissed >= 10 && shouldSpawnItems){
             gameOver = true
             pauseGame()
             submitScore()
@@ -272,51 +214,12 @@ class GameScene: SKScene {
             }
         }
     }
-    /*
-     random number generation
-     */
-    func random() -> CGFloat{
-        return CGFloat(Float(arc4random()) / Float(0xFFFFFFFF))
-    }
-    
-    func random(min: CGFloat, max:CGFloat) -> CGFloat{
-        return random() * (max-min) + min
-    }
-    
+
     //MARK: Difficulty calculation
     func evaluateDifficulty() {
         if score % 10 == 0 {
-            itemDropInterval *= ITEM_INTERVAL_MULTI
-            itemSpeed *= ITEM_SPEED_MULTI
-        }
-    }
-    
-    /*
-     add an item of trash onto the screen
-     */
-    func addItem(){
-        //create a new item with a random texture
-        if let randomItemTexture = trashItemTextures.randomElement(){
-            let item = Item(itemTexture: randomItemTexture)
-            item.name = randomItemTexture.type.rawValue
-            item.position = CGPoint(x: random(min: item.size.width,
-                                              max: SCREEN_WIDTH - item.size.width),
-                                    y: SCREEN_HEIGHT + item.size.height)
-            item.zPosition = CGFloat(ZPositions.item.rawValue)
-            //set physics
-            item.physicsBody?.velocity = CGVector(dx: 0,
-                                                  dy: CGFloat(-itemSpeed))
-            
-            //increase touchable area for smaller items
-            if item.size.height * item.size.width < 7000 {
-                let largestDimension = max(item.size.height, item.size.width)
-                let touchArea = SKShapeNode(circleOfRadius: largestDimension / 2)
-                touchArea.alpha = 0.0
-                item.addChild(touchArea)
-            }
-            
-            itemLayer.addChild(item)
-            print("\(item.name ?? "nothing") added")
+            //super.itemMovement.spawnInterval.progressValue()
+            super.itemMovement.speed.progressValue()
         }
     }
     
@@ -326,36 +229,34 @@ class GameScene: SKScene {
     func initScoring() {
         
         //setup scoring
-        scoreNode.position = CGPoint(x: SCREEN_WIDTH * 0.25,
-                                     y: SCREEN_HEIGHT - BOUNDARY_OUTSET)
-        scoreNode.zPosition = CGFloat(ZPositions.foreground.rawValue)
-        scoreNode.text = "\(score)"
-        scoreNode.fontColor = LookAndFeel.currentColorScheme.scoredItemsText
-        scoreNode.fontSize = LookAndFeel.fontScheme.scoreFontSize
-        scoreNode.fontName = LookAndFeel.fontScheme.scoreFontName
+        scoreNode = LookAndFeel.textNode(text: "\(score)",
+                                         at: CGPoint(x: SCREEN_WIDTH * 0.25,
+                                                     y: SCREEN_HEIGHT - BOUNDARY_OUTSET),
+                                         as: FontScheme.score,
+                                         color: ColorScheme.currentColorClass.scoredItemsText)
+        scoreNode.zPosition = ZPositions.foreground.rawValue
         scoringLayer.addChild(scoreNode)
         
-        itemsMissedNode.text = "\(itemsMissed)"
-        itemsMissedNode.position = CGPoint(x: SCREEN_WIDTH * 0.75,
-                                           y: SCREEN_HEIGHT - BOUNDARY_OUTSET)
-        itemsMissedNode.zPosition = CGFloat(ZPositions.foreground.rawValue)
-        itemsMissedNode.fontColor = LookAndFeel.currentColorScheme.missedItemsText
-        itemsMissedNode.fontSize = LookAndFeel.fontScheme.scoreFontSize
-        itemsMissedNode.fontName = LookAndFeel.fontScheme.scoreFontName
+        itemsMissedNode = LookAndFeel.textNode(text: "\(itemsMissed)",
+                                               at: CGPoint(x: SCREEN_WIDTH * 0.75,
+                                                           y: SCREEN_HEIGHT - BOUNDARY_OUTSET),
+                                               as: FontScheme.score,
+                                               color: ColorScheme.currentColorClass.missedItemsText)
+        itemsMissedNode.zPosition = ZPositions.foreground.rawValue
         scoringLayer.addChild(itemsMissedNode)
         
         //setup scoring bins
         compostBin = SKSpriteNode(imageNamed: "compost_bin")
         compostBin.position = CGPoint(x: compostBin.size.width * 0.75,
                                       y: compostBin.size.height)
-        compostBin.zPosition = CGFloat(ZPositions.background.rawValue)
+        compostBin.zPosition = ZPositions.background.rawValue
         itemTypeToBin.updateValue(compostBin, forKey: ItemType.compost)
         scoringLayer.addChild(compostBin)
         
         recycleBin = SKSpriteNode(imageNamed: "recycle_bin")
         recycleBin.position = CGPoint(x: SCREEN_WIDTH - recycleBin.size.width * 0.75,
                                       y: recycleBin.size.height)
-        recycleBin.zPosition = CGFloat(ZPositions.background.rawValue)
+        recycleBin.zPosition = ZPositions.background.rawValue
         itemTypeToBin.updateValue(recycleBin, forKey: ItemType.recycle)
         scoringLayer.addChild(recycleBin)
     }
@@ -364,11 +265,11 @@ class GameScene: SKScene {
     func initPauseButton() {
         //system images are vectors and spritekit cannot handle them, so we have to convert
         var pauseUnpress = UIImage(systemName: "pause.fill")!
-            .withTintColor(LookAndFeel.currentColorScheme.unpressedButton, renderingMode: .alwaysOriginal)
+            .withTintColor(ColorScheme.currentColorClass.unpressedButton, renderingMode: .alwaysOriginal)
         pauseUnpress = UIImage(data: pauseUnpress.pngData()!)!
         
         var pausePress = UIImage(systemName: "pause.fill")!
-            .withTintColor(LookAndFeel.currentColorScheme.pressedButton, renderingMode: .alwaysOriginal)
+            .withTintColor(ColorScheme.currentColorClass.pressedButton, renderingMode: .alwaysOriginal)
         pausePress = UIImage(data: pausePress.pngData()!)!
         
         //view.safeAreaInsets does not work for some reason
@@ -383,15 +284,16 @@ class GameScene: SKScene {
     }
     
     func unpauseGame() {
-        gamePlayIsPaused = false
-        physicsWorld.speed = 1.0
+        super.shouldSpawnItems = true
+        super.physicsWorld.speed = 1.0
         for child in itemLayer.children {
             child.isPaused = false
         }
     }
     
     func pauseGame() {
-        gamePlayIsPaused = true
+        super.shouldSpawnItems = false
+        self.gamePlayIsPaused = true
         physicsWorld.speed = 0
         for child in itemLayer.children {
             child.isPaused = true
@@ -445,18 +347,6 @@ class GameScene: SKScene {
         
         let cgImage = context.createCGImage(result ?? CIImage(), from: inputImage.extent)
         return UIImage(cgImage: cgImage!, scale: sourceImage.scale * 0.98, orientation: sourceImage.imageOrientation)
-    }
-    
-    func loadItemTextures() {
-        //initialize trash item textures
-        for i in 0..<NUM_OF_COMPOST_IMG{
-            trashItemTextures.insert( ItemTexture(texture: SKTexture(imageNamed: "compost/compost\(i)"),
-                                                  type: ItemType.compost))
-        }
-        for i in 0..<NUM_OF_RECYCLE_IMG{
-            trashItemTextures.insert( ItemTexture(texture: SKTexture(imageNamed: "recycle/recycle\(i)"),
-                                                  type: ItemType.recycle))
-        }
     }
     
 }
