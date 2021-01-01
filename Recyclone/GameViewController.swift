@@ -28,7 +28,7 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate {
 
          
     // IMPORTANT: replace the red string below with your own Leaderboard ID (the one you've set in iTunes Connect)
-    let LEADERBOARD_ID = "com.highscore.Recyclone"
+    let LEADERBOARD_ID = "com.Recyclone.highscore"
     	
     override func viewDidLoad() {
         
