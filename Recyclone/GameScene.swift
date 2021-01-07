@@ -72,17 +72,28 @@ class GameScene: ItemAdderScene {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    //MARK: ItemAdderScene overrides
-    
+
+    //MARK: Missed item
     override func itemDidContactBoundary() {
         HapticFeedbackScheme.gameplayFeedback.notificationOccurred(.warning)
         LookAndFeel.audioScheme.missed.play()
         itemsMissed += 1
     }
     
-    override func addItem() {
-        var item = super.createRandomItem()
+    //MARK: Add an item
+    
+    override func whenAddItemReady() {
+        addItem(count: 10)
+    }
+    
+    func addItem(at position: CGPoint? = nil, count: Int = 1) {
+        for _ in 0..<count {
+            addItem()
+        }
+    }
+    
+    override func addItem(at position: CGPoint? = nil) {
+        let item = super.createRandomItem()
         //increase touchable area for smaller items
         if item.size.height * item.size.width < 7000 {
             let largestDimension = max(item.size.height, item.size.width)
@@ -134,6 +145,7 @@ class GameScene: ItemAdderScene {
         }
     }
     
+    //MARK: Increment score
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches {
             
@@ -219,11 +231,10 @@ class GameScene: ItemAdderScene {
             }
         }
     }
-
+    
     //MARK: Difficulty calculation
     func evaluateDifficulty() {
         if score % 10 == 0 {
-            //super.itemMovement.spawnInterval.progressValue()
             super.itemMovement.speed.progressValue()
         }
     }

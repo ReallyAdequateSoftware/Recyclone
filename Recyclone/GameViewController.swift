@@ -28,10 +28,6 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate {
     var gcEnabled = Bool() // Check if the user has Game Center enabled
     var gcDefaultLeaderBoard = String() // Check the default leaderboardID
 
-         
-    // IMPORTANT: replace the red string below with your own Leaderboard ID (the one you've set in iTunes Connect)
-    //let LEADERBOARD_ID = "com.Recyclone.highscore.weekly"
-    	
     override func viewDidLoad() {
         
         super.viewDidLoad()

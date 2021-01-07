@@ -16,6 +16,15 @@ func sqrt(a: CGFloat) -> CGFloat {
 }
 #endif
 
+typealias CGTimeInterval = CGFloat
+func +(left: TimeInterval, right: CGTimeInterval) -> CGTimeInterval {
+    return CGTimeInterval(left) + CGTimeInterval(right)
+}
+
+func -(left: TimeInterval, right: CGTimeInterval) -> CGTimeInterval {
+    return CGTimeInterval(left) - CGTimeInterval(right)
+}
+
 class ProgressiveProperty {
     var value: CGFloat
     var multiplier: CGFloat
@@ -34,14 +43,6 @@ class ProgressiveProperty {
     }
 }
 
-typealias CGTimeInterval = CGFloat
-func +(left: TimeInterval, right: CGTimeInterval) -> CGTimeInterval {
-    return CGTimeInterval(left) + CGTimeInterval(right)
-}
-
-func -(left: TimeInterval, right: CGTimeInterval) -> CGTimeInterval {
-    return CGTimeInterval(left) - CGTimeInterval(right)
-}
 
 struct ItemMovement {
     var speed:         ProgressiveProperty      = ProgressiveProperty(value: -200, multiplier: 1.1)
@@ -120,8 +121,6 @@ class ItemAdderScene: SKScene {
 
     }
     
-    
-    //MARK: Touch event handling
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
 
     }
@@ -160,9 +159,12 @@ class ItemAdderScene: SKScene {
         self.itemDropCountdown -= delta
         
         if (self.itemDropCountdown <= 0 && shouldSpawnItems) {
-            addItem()
             self.itemDropCountdown = self.itemMovement.spawnInterval.value
         }
+    }
+    
+    func whenAddItemReady() {
+        addItem()
     }
     
     /*
@@ -179,8 +181,11 @@ class ItemAdderScene: SKScene {
     /*
      add an item of trash onto the screen
      */
-    func addItem(){
+    func addItem(at position: CGPoint? = nil){
         let item = createRandomItem()
+        if let position = position {
+            item.position = position
+        }
         itemLayer.addChild(item)
     }
     
@@ -190,15 +195,23 @@ class ItemAdderScene: SKScene {
         if let randomItemTexture = trashItemTextures.randomElement() {
             item = Item(itemTexture: randomItemTexture)
             item.name = randomItemTexture.type.rawValue
-            item.position = CGPoint(x: random(min: item.size.width,
-                                              max: SCREEN_WIDTH - item.size.width),
-                                    y: SCREEN_HEIGHT + item.size.height)
+            item.position = randomPointOutsideBounds(for: item.size)
             item.zPosition = CGFloat(ZPositions.item.rawValue)
             //set physics
             item.physicsBody?.velocity = CGVector(dx: 0,
                                                   dy: CGFloat(itemMovement.speed.value))
         }
         return item
+    }
+    
+    func randomPointOutsideBounds(for size: CGSize) -> CGPoint {
+        return randomPointOutsideBounds(for: size, outside: self.frame)
+    }
+    
+    func randomPointOutsideBounds(for size: CGSize, outside bounds: CGRect) -> CGPoint {
+        return CGPoint(x: random(min: size.width,
+                                 max: bounds.width - size.width),
+                       y: bounds.height + size.height)
     }
     
     func loadItemTextures() {
