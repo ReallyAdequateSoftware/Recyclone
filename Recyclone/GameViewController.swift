@@ -12,11 +12,13 @@ import GameKit
 
 extension GameViewController: GCWrangler {
     func showLeaderboard() {
-        let gcVC = GKGameCenterViewController()
-        gcVC.gameCenterDelegate = self
-        gcVC.viewState = .leaderboards
-        gcVC.leaderboardIdentifier = LEADERBOARD_ID
-        present(gcVC, animated: true, completion: nil)
+        if self.gcEnabled {
+            let gcVC = GKGameCenterViewController()
+            gcVC.gameCenterDelegate = self
+            gcVC.viewState = .leaderboards
+            gcVC.leaderboardIdentifier = self.gcDefaultLeaderBoard
+            present(gcVC, animated: true, completion: nil)
+        }
     }
 }
 
@@ -28,7 +30,7 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate {
 
          
     // IMPORTANT: replace the red string below with your own Leaderboard ID (the one you've set in iTunes Connect)
-    let LEADERBOARD_ID = "com.Recyclone.highscore"
+    //let LEADERBOARD_ID = "com.Recyclone.highscore.weekly"
     	
     override func viewDidLoad() {
         
@@ -64,7 +66,11 @@ class GameViewController: UIViewController, GKGameCenterControllerDelegate {
                 // Get the default leaderboard ID
                 localPlayer.loadDefaultLeaderboardIdentifier(completionHandler: { (leaderboardIdentifer, error) in
                     if error != nil { print(error)
-                    } else { self.gcDefaultLeaderBoard = leaderboardIdentifer! }
+                    } else {
+                        print(leaderboardIdentifer)
+                        self.gcDefaultLeaderBoard = leaderboardIdentifer!
+                        print(self.gcDefaultLeaderBoard)
+                    }
                 })
                  
             } else {
