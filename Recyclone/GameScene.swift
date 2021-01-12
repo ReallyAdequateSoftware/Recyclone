@@ -83,7 +83,8 @@ class GameScene: ItemAdderScene {
     //MARK: Add an item
     
     override func whenAddItemReady() {
-        addItem(count: 10)
+        addItem()
+        
     }
     
     func addItem(at position: CGPoint? = nil, count: Int = 1) {

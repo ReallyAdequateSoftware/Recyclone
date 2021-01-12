@@ -107,7 +107,8 @@ class MainMenuScene: ItemAdderScene {
         self.gcWranglerDelegate = nil
     }
     
-    override func addItem(){
+    //TODO: refactor
+    override func addItem(at position: CGPoint? = nil){
         //create a new item with a random texture
         if let randomItemTexture = trashItemTextures.randomElement(){
             let item = Item(itemTexture: randomItemTexture)

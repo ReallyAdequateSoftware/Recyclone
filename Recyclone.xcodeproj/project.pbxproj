@@ -45,6 +45,8 @@
 		1695087E256DCC450035E2D5 /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1695087C256DCC450035E2D5 /* Button.swift */; };
 		1695087F256DCC450035E2D5 /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1695087C256DCC450035E2D5 /* Button.swift */; };
 		16A34A34256DAE2200EB6645 /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16A34A33256DAE2200EB6645 /* GameKit.framework */; };
+		16A7764D25A7C50B00AA73F5 /* ProgressiveProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16A7764C25A7C50B00AA73F5 /* ProgressiveProperty.swift */; };
+		16A7764E25A7C50B00AA73F5 /* ProgressiveProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16A7764C25A7C50B00AA73F5 /* ProgressiveProperty.swift */; };
 		16D90778258AED22002D0629 /* missed.wav in Resources */ = {isa = PBXBuildFile; fileRef = 16D90776258AED22002D0629 /* missed.wav */; };
 		16D90779258AED22002D0629 /* success.wav in Resources */ = {isa = PBXBuildFile; fileRef = 16D90777258AED22002D0629 /* success.wav */; };
 		16E963072523D35900D05497 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 16E963032523D22000D05497 /* LaunchScreen.storyboard */; };
@@ -98,6 +100,7 @@
 		167FBFEE2597E00200069342 /* LookAndFeel+Recyclone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LookAndFeel+Recyclone.swift"; sourceTree = "<group>"; };
 		1695087C256DCC450035E2D5 /* Button.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Button.swift; sourceTree = "<group>"; };
 		16A34A33256DAE2200EB6645 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
+		16A7764C25A7C50B00AA73F5 /* ProgressiveProperty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressiveProperty.swift; sourceTree = "<group>"; };
 		16D90776258AED22002D0629 /* missed.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = missed.wav; sourceTree = "<group>"; };
 		16D90777258AED22002D0629 /* success.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = success.wav; sourceTree = "<group>"; };
 		16E963032523D22000D05497 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -193,6 +196,7 @@
 			children = (
 				167FBFE4259681E300069342 /* ZPositions.swift */,
 				167FBFDD25967FB500069342 /* ItemAdderScene.swift */,
+				16A7764C25A7C50B00AA73F5 /* ProgressiveProperty.swift */,
 				16F443DA25895EC60076CEEA /* LookAndFeel.swift */,
 				167FBFEE2597E00200069342 /* LookAndFeel+Recyclone.swift */,
 				1695087C256DCC450035E2D5 /* Button.swift */,
@@ -363,6 +367,7 @@
 				167FBFDE25967FB500069342 /* ItemAdderScene.swift in Sources */,
 				166684A125227DAF00BBC221 /* GameScene.swift in Sources */,
 				164E16F0256F26910030E3F1 /* PhysicsCategory.swift in Sources */,
+				16A7764D25A7C50B00AA73F5 /* ProgressiveProperty.swift in Sources */,
 				16773EBE2588228B00585823 /* InGameMenuScene.swift in Sources */,
 				1695087D256DCC450035E2D5 /* Button.swift in Sources */,
 				166684A325227DAF00BBC221 /* GameViewController.swift in Sources */,
@@ -381,6 +386,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				16A7764E25A7C50B00AA73F5 /* ProgressiveProperty.swift in Sources */,
 				167FBFDF25967FB500069342 /* ItemAdderScene.swift in Sources */,
 				16773EBF2588228B00585823 /* InGameMenuScene.swift in Sources */,
 				164E16E5256F25370030E3F1 /* Item.swift in Sources */,

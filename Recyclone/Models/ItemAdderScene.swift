@@ -25,25 +25,6 @@ func -(left: TimeInterval, right: CGTimeInterval) -> CGTimeInterval {
     return CGTimeInterval(left) - CGTimeInterval(right)
 }
 
-class ProgressiveProperty {
-    var value: CGFloat
-    var multiplier: CGFloat
-    
-    init(value: CGFloat, multiplier: CGFloat) {
-        self.value = value
-        self.multiplier = multiplier
-    }
-    
-    func progressValue() {
-        self.value *= self.multiplier
-    }
-    
-    func regressValue() {
-        self.value /= self.multiplier
-    }
-}
-
-
 struct ItemMovement {
     var speed:         ProgressiveProperty      = ProgressiveProperty(value: -200, multiplier: 1.1)
     var spawnInterval: ProgressiveProperty = ProgressiveProperty(value: CGTimeInterval(1), multiplier:  0.85)
